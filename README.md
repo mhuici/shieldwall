@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NotiLegal
 
-## Getting Started
+El torniquete digital para PyMEs argentinas. Sistema de notificación fehaciente de sanciones laborales.
 
-First, run the development server:
+## Setup Rápido
+
+### 1. Crear proyecto en Supabase
+
+1. Ir a [supabase.com](https://supabase.com) y crear cuenta/proyecto
+2. Copiar la URL y la anon key desde **Settings > API**
+3. Configurar en `.env.local`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+NEXT_PUBLIC_SUPABASE_URL=https://tu-proyecto.supabase.co
+NEXT_PUBLIC_SUPABASE_ANON_KEY=tu-anon-key
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Crear tablas en Supabase
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. Ir a **SQL Editor** en el dashboard de Supabase
+2. Copiar y ejecutar el contenido de `supabase/schema.sql`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 3. Configurar Auth
 
-## Learn More
+1. En Supabase: **Authentication > Providers**
+2. Habilitar "Email" (magic link)
+3. En **Email Templates**, personalizar el template en español (opcional)
 
-To learn more about Next.js, take a look at the following resources:
+### 4. Iniciar el proyecto
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+npm install
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Abrir [http://localhost:3000](http://localhost:3000)
 
-## Deploy on Vercel
+## Estructura del Proyecto
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```
+src/
+├── app/
+│   ├── (auth)/login/          # Página de login
+│   ├── (dashboard)/           # Dashboard protegido
+│   │   ├── empleados/         # CRUD empleados
+│   │   ├── sanciones/         # Lista y nueva sanción
+│   │   └── onboarding/        # Crear empresa
+│   ├── auth/callback/         # Callback de auth
+│   └── ver/[id]/              # Vista pública de notificación
+├── components/
+│   ├── ui/                    # Componentes shadcn/ui
+│   └── layout/                # Sidebar, header
+└── lib/
+    ├── supabase/              # Clientes de Supabase
+    ├── types.ts               # Tipos TypeScript
+    └── validators.ts          # Validadores (CUIL, etc)
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Stack Técnico
+
+- **Framework**: Next.js 16 (App Router)
+- **Estilos**: Tailwind CSS + shadcn/ui
+- **Base de datos**: Supabase (PostgreSQL)
+- **Auth**: Supabase Auth (Magic Link)
+- **Lenguaje**: TypeScript
+
+## Roadmap
+
+- [x] Día 1: Setup proyecto + Supabase + Auth
+- [ ] Día 2: Branding + Login + Onboarding
+- [ ] Día 3: CRUD Empleados
+- [ ] Día 4: Formulario sanción + PDF
+- [ ] Día 5: Twilio SMS + SendGrid Email
+- [ ] Día 6: Página pública + Tracking
+- [ ] Día 7: Dashboard + Testing + Deploy
+
+## Deploy
+
+La forma más fácil de deployar es usar [Vercel](https://vercel.com):
+
+1. Conectar el repo de GitHub
+2. Configurar las variables de entorno en Vercel
+3. Deploy automático en cada push
