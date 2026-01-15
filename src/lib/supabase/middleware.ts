@@ -39,9 +39,9 @@ export async function updateSession(request: NextRequest) {
 
   // Rutas públicas que no requieren auth
   const publicRoutes = ["/login", "/auth/callback", "/ver", "/onboarding", "/api/cron", "/api/webhooks"];
-  const isPublicRoute = publicRoutes.some((route) =>
-    request.nextUrl.pathname.startsWith(route)
-  );
+  const isPublicRoute =
+    request.nextUrl.pathname === "/" ||
+    publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route));
 
   if (!user && !isPublicRoute) {
     // No user, redirect to login
