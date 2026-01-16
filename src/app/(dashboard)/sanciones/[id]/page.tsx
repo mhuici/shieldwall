@@ -24,6 +24,8 @@ import Link from "next/link";
 import { formatearCUIL } from "@/lib/validators";
 import { EnviarNotificacionButton } from "@/components/sanciones/enviar-notificacion-button";
 import { SemaforoBadge } from "@/components/notificaciones/semaforo-notificacion";
+import { SeccionDescargoEmpleador } from "@/components/descargo";
+import { TimelineUnificado } from "@/components/timeline";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -300,6 +302,12 @@ export default async function SancionDetailPage({ params }: PageProps) {
           </div>
         </CardContent>
       </Card>
+
+      {/* Audiencia de Descargo */}
+      <SeccionDescargoEmpleador notificacionId={notificacion.id} />
+
+      {/* Timeline de Cadena de Custodia */}
+      <TimelineUnificado notificacionId={notificacion.id} />
 
       {/* Enviar Notificación */}
       <Card>

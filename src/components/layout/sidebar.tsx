@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   Users,
   FileText,
+  BookOpen,
   Plus,
   LogOut,
   Menu,
@@ -27,6 +28,7 @@ const navigation = [
   { name: "Dashboard", href: "/", icon: LayoutDashboard },
   { name: "Empleados", href: "/empleados", icon: Users },
   { name: "Sanciones", href: "/sanciones", icon: FileText },
+  { name: "Bitácora", href: "/bitacora", icon: BookOpen },
 ];
 
 export function Sidebar({ empresa, userEmail }: SidebarProps) {

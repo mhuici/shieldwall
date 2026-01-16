@@ -32,9 +32,13 @@ import {
   Clock,
   MapPin,
   Users,
+  ImagePlus,
 } from "lucide-react";
-import type { Empresa, TipoSancion, Gravedad, NivelReincidencia, Testigo, MotivoSancion } from "@/lib/types";
+import type { Empresa, TipoSancion, Gravedad, NivelReincidencia, Testigo, MotivoSancion, CrearTestigoForm } from "@/lib/types";
 import { TIPO_SANCION_LABELS, GRAVEDAD_LABELS, LIMITE_DIAS_SUSPENSION_ANUAL } from "@/lib/types";
+import { ListaTestigos } from "@/components/testigos";
+import { UploadEvidencia, type EvidenciaLocal } from "@/components/evidencia";
+import { ResumenBitacora } from "@/components/bitacora";
 import SHA256 from "crypto-js/sha256";
 import { format, addDays } from "date-fns";
 import {
@@ -87,8 +91,11 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
   const [fechaInicioSuspension, setFechaInicioSuspension] = useState("");
   const [fechaFinSuspension, setFechaFinSuspension] = useState("");
 
-  // Testigos
-  const [testigos, setTestigos] = useState<Testigo[]>([]);
+  // Testigos (nuevo sistema digital)
+  const [testigos, setTestigos] = useState<CrearTestigoForm[]>([]);
+
+  // Evidencia multimedia
+  const [evidencias, setEvidencias] = useState<EvidenciaLocal[]>([]);
 
   // Análisis del empleado
   const [analisisEmpleado, setAnalisisEmpleado] = useState<ResultadoAnalisisEmpleado | null>(null);
@@ -134,12 +141,21 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
   // Validar descripción cuando cambia
   useEffect(() => {
     if (descripcion.length > 20) {
+      // Mapear testigos al formato esperado por la función de validación
+      const testigosParaValidacion = testigos.length > 0
+        ? testigos.map(t => ({
+            nombre: t.nombre_completo,
+            cargo: t.cargo || "",
+            presente_en_hecho: t.presente_en_hecho,
+          }))
+        : undefined;
+
       const resultado = validarEspecificidadMotivo({
         descripcion,
         fechaHecho,
         horaHecho: horaHecho || undefined,
         lugarHecho: lugarHecho || undefined,
-        testigos: testigos.length > 0 ? testigos : undefined,
+        testigos: testigosParaValidacion,
         motivoCodigo: motivoCodigo || undefined,
       });
       setValidacionDescripcion(resultado);
@@ -194,18 +210,35 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
     }
   };
 
-  const handleAgregarTestigo = () => {
-    setTestigos([...testigos, { nombre: "", cargo: "", presente_en_hecho: true }]);
+  // Handlers de testigos (nuevo sistema digital)
+  const handleAgregarTestigo = (testigo: CrearTestigoForm) => {
+    setTestigos([...testigos, testigo]);
   };
 
-  const handleRemoverTestigo = (index: number) => {
+  const handleEliminarTestigo = (index: number) => {
     setTestigos(testigos.filter((_, i) => i !== index));
   };
 
-  const handleTestigoChange = (index: number, field: keyof Testigo, value: string | boolean) => {
-    const nuevosTestigos = [...testigos];
-    nuevosTestigos[index] = { ...nuevosTestigos[index], [field]: value };
-    setTestigos(nuevosTestigos);
+  // Handlers de evidencia
+  const handleAgregarEvidencia = (evidencia: EvidenciaLocal) => {
+    setEvidencias([...evidencias, evidencia]);
+  };
+
+  const handleEliminarEvidencia = (id: string) => {
+    const ev = evidencias.find((e) => e.id === id);
+    if (ev?.url_preview) {
+      URL.revokeObjectURL(ev.url_preview);
+    }
+    setEvidencias(evidencias.filter((e) => e.id !== id));
+  };
+
+  const handleTogglePrincipal = (id: string) => {
+    setEvidencias(
+      evidencias.map((e) => ({
+        ...e,
+        es_prueba_principal: e.id === id,
+      }))
+    );
   };
 
   const generarHash = (contenido: string): string => {
@@ -305,9 +338,14 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
         insertData.fecha_fin_suspension = fechaFinSuspension;
       }
 
-      // Testigos
+      // Testigos (convertir al formato legacy para BD, los digitales se crean después)
       if (testigos.length > 0) {
-        insertData.testigos = testigos.filter((t) => t.nombre.trim());
+        // Guardar en formato simplificado para compatibilidad
+        insertData.testigos = testigos.map((t) => ({
+          nombre: t.nombre_completo,
+          cargo: t.cargo || "",
+          presente_en_hecho: t.presente_en_hecho,
+        }));
       }
 
       const { data: notificacion, error: insertError } = await supabase
@@ -317,6 +355,63 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
         .single();
 
       if (insertError) throw insertError;
+
+      // Crear testigos digitales en la nueva tabla
+      if (testigos.length > 0) {
+        const testigosDigitales = testigos.map((t) => ({
+          empresa_id: empresa.id,
+          notificacion_id: notificacion.id,
+          nombre_completo: t.nombre_completo,
+          cargo: t.cargo || null,
+          cuil: t.cuil || null,
+          email: t.email || null,
+          telefono: t.telefono || null,
+          relacion: t.relacion,
+          presente_en_hecho: t.presente_en_hecho,
+          estado: "pendiente",
+        }));
+
+        const { error: testigosError } = await supabase
+          .from("declaraciones_testigos")
+          .insert(testigosDigitales);
+
+        if (testigosError) {
+          console.error("Error al crear testigos digitales:", testigosError);
+          // No fallar la operación principal, los testigos se pueden agregar después
+        }
+      }
+
+      // Subir evidencia multimedia
+      if (evidencias.length > 0) {
+        for (let i = 0; i < evidencias.length; i++) {
+          const ev = evidencias[i];
+          try {
+            const formData = new FormData();
+            formData.append("file", ev.file);
+            formData.append("tipo", ev.tipo);
+            formData.append("notificacion_id", notificacion.id);
+            formData.append("hash_sha256", ev.hash_sha256);
+            formData.append("es_prueba_principal", ev.es_prueba_principal.toString());
+            formData.append("orden", i.toString());
+            if (ev.descripcion) formData.append("descripcion", ev.descripcion);
+            if (ev.exif_fecha_captura) formData.append("exif_fecha_captura", ev.exif_fecha_captura);
+            if (ev.exif_latitud) formData.append("exif_latitud", ev.exif_latitud.toString());
+            if (ev.exif_longitud) formData.append("exif_longitud", ev.exif_longitud.toString());
+
+            const response = await fetch("/api/evidencia/upload", {
+              method: "POST",
+              body: formData,
+            });
+
+            if (!response.ok) {
+              console.error("Error subiendo evidencia:", await response.text());
+            }
+          } catch (uploadErr) {
+            console.error("Error subiendo evidencia:", uploadErr);
+            // No fallar la operación principal
+          }
+        }
+      }
 
       setSancionId(notificacion.id);
       setSuccess(true);
@@ -377,6 +472,7 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
               setTipoSancion("apercibimiento");
               setDescripcion("");
               setTestigos([]);
+              setEvidencias([]);
               setAnalisisEmpleado(null);
             }}
           >
@@ -452,6 +548,13 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
                   <p className="text-amber-700">{analisisEmpleado.patrones.mensaje}</p>
                 </div>
               )}
+            </div>
+          )}
+
+          {/* Historial de Gestión (Bitácora) */}
+          {empleadoId && (
+            <div className="mt-4">
+              <ResumenBitacora empleadoId={empleadoId} />
             </div>
           )}
         </CardContent>
@@ -751,61 +854,48 @@ export function NuevaSancionForm({ empresa, empleados }: NuevaSancionFormProps) 
         </CardContent>
       </Card>
 
-      {/* Paso 6: Testigos */}
+      {/* Paso 6: Testigos Digitales */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-lg">
             <Users className="h-5 w-5" />
-            Testigos
-            {motivoSeleccionado?.requiere_testigos && (
-              <Badge variant="destructive" className="ml-2">
-                Obligatorio
-              </Badge>
-            )}
+            Testigos Digitales
           </CardTitle>
           <CardDescription>
-            Agregá testigos que presenciaron el hecho (recomendado para mayor validez probatoria)
+            Los testigos recibirán un link para completar su declaración bajo juramento.
+            Esto genera evidencia con valor probatorio reforzado.
           </CardDescription>
         </CardHeader>
-        <CardContent className="space-y-4">
-          {testigos.map((testigo, index) => (
-            <div key={index} className="flex gap-3 items-start p-3 bg-slate-50 rounded-lg">
-              <div className="flex-1 grid grid-cols-2 gap-3">
-                <Input
-                  placeholder="Nombre completo"
-                  value={testigo.nombre}
-                  onChange={(e) => handleTestigoChange(index, "nombre", e.target.value)}
-                  disabled={loading}
-                />
-                <Input
-                  placeholder="Cargo (ej: Supervisor)"
-                  value={testigo.cargo}
-                  onChange={(e) => handleTestigoChange(index, "cargo", e.target.value)}
-                  disabled={loading}
-                />
-              </div>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => handleRemoverTestigo(index)}
-                disabled={loading}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          ))}
+        <CardContent>
+          <ListaTestigos
+            testigosTemporales={testigos}
+            onAgregarTestigo={handleAgregarTestigo}
+            onEliminarTestigo={handleEliminarTestigo}
+            requiereTestigos={motivoSeleccionado?.requiere_testigos}
+          />
+        </CardContent>
+      </Card>
 
-          <Button
-            type="button"
-            variant="outline"
-            onClick={handleAgregarTestigo}
+      {/* Paso 7: Evidencia Multimedia */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <ImagePlus className="h-5 w-5" />
+            Evidencia Multimedia
+          </CardTitle>
+          <CardDescription>
+            Adjuntá fotos, videos o documentos que prueben el hecho.
+            Los metadatos EXIF (fecha, ubicación) quedarán registrados.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <UploadEvidencia
+            evidencias={evidencias}
+            onAdd={handleAgregarEvidencia}
+            onRemove={handleEliminarEvidencia}
+            onTogglePrincipal={handleTogglePrincipal}
             disabled={loading}
-            className="w-full"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Agregar Testigo
-          </Button>
+          />
         </CardContent>
       </Card>
 
