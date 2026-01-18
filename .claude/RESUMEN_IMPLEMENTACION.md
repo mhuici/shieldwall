@@ -1,6 +1,6 @@
 # RESUMEN DE IMPLEMENTACIÓN - NOTILEGAL V2
 
-## Estado Actual: Fase 5 Pendiente (Firma PKI / TSA)
+## Estado Actual: Fase 6 Pendiente (Pack Evidencia v2.0)
 
 ---
 
@@ -108,6 +108,40 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 
 ---
 
+## ✅ COMPLETADO: Fase 5 - Firma PKI / TSA
+
+### Implementado:
+
+1. **TSA RFC 3161 (FreeTSA)**
+   - `src/lib/timestamp/tsa-rfc3161.ts` - Sellado de tiempo conforme RFC 3161
+   - Servidores: FreeTSA.org, DigiCert
+   - Genera token TSA verificable independientemente
+
+2. **Cron para verificar timestamps pendientes**
+   - `src/app/api/cron/verificar-timestamps/route.ts`
+   - Verifica timestamps OpenTimestamps cada 6 horas
+   - Actualiza estado cuando se confirma en blockchain
+
+3. **Servicio de auto-timestamp**
+   - `src/lib/services/auto-timestamp.ts` - Llamar después de crear documentos
+   - `src/app/api/timestamp/registrar/route.ts` - Registra timestamps dual
+
+4. **Verificación pública mejorada**
+   - `/api/verificar/publico` - Ahora incluye info de TSA, blockchain y firma
+   - Muestra estado de sellado y firma digital
+
+5. **Migración TSA RFC 3161**
+   - `supabase/migrations/20260121000003_tsa_rfc3161.sql`
+   - Tabla `sellos_tsa` para historial
+   - Campos en notificaciones: `tsa_*`
+   - Función `registrar_sello_timestamp()`
+
+6. **Infraestructura existente integrada:**
+   - OpenTimestamps (blockchain Bitcoin)
+   - Firma digital PKI (Art. 288 CCyC)
+
+---
+
 ## PENDIENTE (Orden de prioridad)
 
 | Fase | Componente | Prioridad | Estado |
@@ -115,8 +149,8 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 | 1-2 | Biometría AWS Rekognition | CRÍTICA | ✅ |
 | 3 | Webhooks + Reconciliación | CRÍTICA | ✅ |
 | 4 | Protocolo Lectura Activa | ALTA | ✅ |
-| 5 | Firma PKI (TSA) | ALTA | ⏳ Siguiente |
-| 6 | Pack Evidencia v2.0 | ALTA | Pendiente |
+| 5 | Firma PKI (TSA) | ALTA | ✅ |
+| 6 | Pack Evidencia v2.0 | ALTA | ⏳ Siguiente |
 | 7 | Contingencia Conectividad | ALTA | Pendiente |
 | 8 | RENAPER (opcional) | MEDIA | Pendiente |
 | 9 | Subsidiariedad Física | MEDIA | Pendiente |

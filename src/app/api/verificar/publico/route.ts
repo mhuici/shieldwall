@@ -9,6 +9,24 @@ interface DocumentoEncontrado {
   fecha_creacion: string;
   hash_almacenado: string;
   metadata?: Record<string, unknown>;
+  // Información de timestamps
+  timestamp_tsa?: {
+    estado: string;
+    fecha: string | null;
+    tsa_url: string | null;
+  };
+  timestamp_blockchain?: {
+    estado: string;
+    bitcoin_block_height: number | null;
+    bitcoin_block_hash: string | null;
+  };
+  // Información de firma digital
+  firma_digital?: {
+    aplicada: boolean;
+    fecha: string | null;
+    firmante: string | null;
+    algoritmo: string | null;
+  };
 }
 
 // POST: Buscar documento por hash (público, sin autenticación)
@@ -41,7 +59,10 @@ export async function POST(request: NextRequest) {
       .select(`
         id, tipo, motivo, created_at, hash_sha256,
         empleado:empleados(nombre),
-        empresa:empresas(razon_social)
+        empresa:empresas(razon_social),
+        tsa_estado, tsa_timestamp, tsa_url,
+        ots_estado, ots_bitcoin_block_height, ots_bitcoin_block_hash,
+        firma_digital_aplicada, firma_digital_fecha, firma_digital_firmante, firma_digital_algoritmo
       `)
       .eq("hash_sha256", hashBuscado)
       .single();
@@ -61,6 +82,24 @@ export async function POST(request: NextRequest) {
           motivo: notificacion.motivo,
           empleado: empleado?.nombre || "N/A",
           empresa: empresa?.razon_social || "N/A",
+        },
+        // Información de timestamps
+        timestamp_tsa: {
+          estado: notificacion.tsa_estado || "no_creado",
+          fecha: notificacion.tsa_timestamp,
+          tsa_url: notificacion.tsa_url,
+        },
+        timestamp_blockchain: {
+          estado: notificacion.ots_estado || "no_creado",
+          bitcoin_block_height: notificacion.ots_bitcoin_block_height,
+          bitcoin_block_hash: notificacion.ots_bitcoin_block_hash,
+        },
+        // Información de firma digital
+        firma_digital: {
+          aplicada: notificacion.firma_digital_aplicada || false,
+          fecha: notificacion.firma_digital_fecha,
+          firmante: notificacion.firma_digital_firmante,
+          algoritmo: notificacion.firma_digital_algoritmo,
         },
       });
     }
@@ -271,7 +310,7 @@ export async function POST(request: NextRequest) {
 export async function GET() {
   return NextResponse.json({
     servicio: "Verificador de Integridad Documental - NotiLegal",
-    version: "1.0",
+    version: "2.0",
     descripcion: "API pública para verificar la integridad de documentos generados por NotiLegal",
     uso: {
       metodo: "POST",
@@ -288,6 +327,18 @@ export async function GET() {
       "descargo - Respuestas/descargos del empleado",
       "bitacora - Entradas de bitácora de novedades",
       "paquete - Paquetes de evidencia exportados",
+    ],
+    verificaciones_incluidas: {
+      integridad: "Hash SHA-256 del documento",
+      timestamp_tsa: "Sello de tiempo RFC 3161 (fecha cierta inmediata)",
+      timestamp_blockchain: "Anclaje en blockchain Bitcoin via OpenTimestamps",
+      firma_digital: "Firma PKI conforme Art. 288 CCyC",
+    },
+    fundamento_legal: [
+      "Acordada N° 3/2015 CSJN - Fecha cierta en sistemas informáticos",
+      "Ley 25.506 - Firma Digital",
+      "Art. 288 CCyC - Equivalencia firma digital/ológrafa",
+      "RFC 3161 - Time-Stamp Protocol",
     ],
     contacto: "soporte@notilegal.com.ar",
   });
