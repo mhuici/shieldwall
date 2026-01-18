@@ -1,10 +1,29 @@
 # RESUMEN DE IMPLEMENTACIÓN - NOTILEGAL V2
 
-## Estado Actual: Fase 6 Pendiente (Pack Evidencia v2.0)
+## Estado Actual: Fase 7 Pendiente (Contingencia Conectividad)
+
+**Última actualización:** 2026-01-18
+**Commits recientes:**
+- `[pendiente]` feat: Implementar Pack Evidencia v2.0 (Fase 6)
+- `24b1c0e` feat: Implementar Fase 5 - Firma PKI y TSA RFC 3161
+- `7e6156f` feat: Implementar protocolo de lectura activa (Fase 4)
+- `6e93106` feat: Implementar webhooks con reconciliación y grace period
 
 ---
 
-## ✅ COMPLETADO
+## ✅ COMPLETADO (Fases 1-6)
+
+| Fase | Componente | Archivos Clave |
+|------|------------|----------------|
+| 1-2 | Biometría AWS Rekognition | `src/lib/rekognition/`, `src/components/biometria/` |
+| 3 | Webhooks + Reconciliación | `src/lib/webhooks/`, `src/app/api/cron/reconciliar/` |
+| 4 | Protocolo Lectura Activa | `src/components/ver/scroll-tracker.tsx`, `reconocimiento-lectura.tsx` |
+| 5 | Firma PKI + TSA | `src/lib/timestamp/`, `src/lib/pki/`, `src/app/api/cron/verificar-timestamps/` |
+| 6 | Pack Evidencia v2.0 | `src/app/api/evidencia/[id]/route.ts`, `src/components/timeline/` |
+
+---
+
+## ✅ COMPLETADO (Detalle)
 
 ### Fase 1-2: Biometría con AWS Rekognition
 
@@ -142,6 +161,48 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 
 ---
 
+## ✅ COMPLETADO: Fase 6 - Pack Evidencia v2.0
+
+### Implementado:
+
+1. **Carpetas nuevas en ZIP de exportación**
+   - `timestamps/` - Tokens TSA RFC 3161 + archivos OpenTimestamps
+   - `biometria/` - Datos de verificación biométrica AWS Rekognition
+   - `protocolo_lectura/` - Tracking de scroll, tiempo y reconocimiento
+   - `firma_digital/` - Firma PKI conforme Art. 288 CCyC
+
+2. **Datos incluidos**
+   - Token TSA (.der) verificable con OpenSSL
+   - Archivo .ots verificable en opentimestamps.org
+   - JSON de verificación biométrica (liveness + comparación)
+   - Tracking detallado de lectura del documento
+   - Firma digital en formato raw
+
+3. **Instrucciones de verificación**
+   - VERIFICAR_TSA.txt - Comandos OpenSSL para TSA
+   - VERIFICAR_BLOCKCHAIN.txt - Verificación en opentimestamps.org
+   - VERIFICAR_FIRMA.txt - Verificación de firma PKI
+
+4. **Componente visual de timeline**
+   - `src/components/timeline/timeline-visual.tsx`
+   - Iconos por tipo de evento (biometría, lectura, timestamps, etc.)
+   - Colores semánticos (verde=éxito, amarillo=pendiente, rojo=error)
+   - Versión compacta para tarjetas
+
+5. **Archivos modificados:**
+   - `src/app/api/evidencia/[id]/route.ts` - Pack Evidencia v2.0
+   - `src/components/timeline/timeline-visual.tsx` (NUEVO)
+   - `src/components/timeline/index.ts` (NUEVO)
+
+6. **Metadata JSON actualizado:**
+   - `biometria` - Datos de verificación AWS
+   - `protocolo_lectura` - Scroll, tiempo, reconocimiento
+   - `timestamps` - TSA + blockchain
+   - `firma_digital` - PKI con certificado
+   - `pack_evidencia_version: "2.0"`
+
+---
+
 ## PENDIENTE (Orden de prioridad)
 
 | Fase | Componente | Prioridad | Estado |
@@ -150,8 +211,8 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 | 3 | Webhooks + Reconciliación | CRÍTICA | ✅ |
 | 4 | Protocolo Lectura Activa | ALTA | ✅ |
 | 5 | Firma PKI (TSA) | ALTA | ✅ |
-| 6 | Pack Evidencia v2.0 | ALTA | ⏳ Siguiente |
-| 7 | Contingencia Conectividad | ALTA | Pendiente |
+| 6 | Pack Evidencia v2.0 | ALTA | ✅ |
+| 7 | Contingencia Conectividad | ALTA | ⏳ Siguiente |
 | 8 | RENAPER (opcional) | MEDIA | Pendiente |
 | 9 | Subsidiariedad Física | MEDIA | Pendiente |
 | 10 | Testing/Auditoría | CRÍTICA | Pendiente |

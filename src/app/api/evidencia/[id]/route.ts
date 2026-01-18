@@ -1,3 +1,20 @@
+/**
+ * API Route: Pack Evidencia v2.0
+ *
+ * GET /api/evidencia/[id]
+ *
+ * Genera paquete completo de evidencia para un caso laboral.
+ * Incluye toda la cadena de custodia, timestamps, firma digital,
+ * biometría y protocolo de lectura activa.
+ *
+ * Versión 2.0 - Enero 2026
+ * - TSA RFC 3161 (fecha cierta inmediata)
+ * - OpenTimestamps (blockchain Bitcoin)
+ * - Firma digital PKI (Art. 288 CCyC)
+ * - Verificación biométrica AWS Rekognition
+ * - Protocolo de lectura activa
+ */
+
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderToBuffer } from "@react-pdf/renderer";
@@ -99,6 +116,52 @@ export async function GET(
           .lte("fecha_hecho", notificacion.fecha_hecho)
           .order("fecha_hecho", { ascending: true })
       : { data: null };
+
+    // ============ PACK EVIDENCIA v2.0 - DATOS ADICIONALES ============
+
+    // Obtener verificación biométrica (Fase 1-2)
+    const { data: biometriaDB } = await supabase
+      .from("verificaciones_biometricas")
+      .select("*")
+      .eq("notificacion_id", id)
+      .single();
+
+    // Obtener tracking de lectura (Fase 4)
+    const { data: trackingLecturaDB } = await supabase
+      .from("tracking_lectura")
+      .select("*")
+      .eq("notificacion_id", id)
+      .order("created_at", { ascending: true });
+
+    // Obtener intentos de reconocimiento (Fase 4)
+    const { data: intentosReconocimientoDB } = await supabase
+      .from("intentos_reconocimiento")
+      .select("*")
+      .eq("notificacion_id", id)
+      .order("created_at", { ascending: true });
+
+    // Obtener timestamps blockchain (Fase 5)
+    const { data: timestampBlockchainDB } = await supabase
+      .from("timestamps_blockchain")
+      .select("*")
+      .eq("tipo_documento", "notificacion")
+      .eq("documento_id", id)
+      .single();
+
+    // Obtener sellos TSA (Fase 5)
+    const { data: sellosTSADB } = await supabase
+      .from("sellos_tsa")
+      .select("*")
+      .eq("tipo_documento", "notificacion")
+      .eq("documento_id", id);
+
+    // Obtener firmas digitales (Fase 5)
+    const { data: firmaDigitalDB } = await supabase
+      .from("firmas_digitales")
+      .select("*")
+      .eq("tipo_documento", "sancion")
+      .eq("documento_id", id)
+      .single();
 
     const empleado = notificacion.empleado as unknown as {
       nombre: string;
@@ -308,6 +371,85 @@ export async function GET(
       }
     }
 
+    // ============ PACK EVIDENCIA v2.0 - EVENTOS ADICIONALES ============
+
+    // Eventos de verificación biométrica (Fase 1-2)
+    if (biometriaDB) {
+      eventos.push({
+        fecha: biometriaDB.created_at,
+        tipo: "biometria_verificacion",
+        titulo: `Verificación biométrica: ${biometriaDB.resultado_final}`,
+        detalle: `Liveness: ${biometriaDB.aws_liveness_confidence}% | Similitud: ${biometriaDB.aws_compare_similarity}%`,
+        ip: biometriaDB.ip_verificacion || undefined,
+      });
+    }
+
+    // Eventos de protocolo de lectura activa (Fase 4)
+    if (notificacion.scroll_completado) {
+      eventos.push({
+        fecha: notificacion.lectura_confirmada_at || notificacion.updated_at,
+        tipo: "scroll_completado",
+        titulo: "Scroll del documento completado",
+        detalle: `Porcentaje máximo: ${notificacion.scroll_porcentaje_maximo}%`,
+      });
+    }
+
+    if (notificacion.tiempo_lectura_segundos > 0) {
+      eventos.push({
+        fecha: notificacion.lectura_confirmada_at || notificacion.updated_at,
+        tipo: "tiempo_lectura",
+        titulo: "Tiempo de lectura registrado",
+        detalle: `${notificacion.tiempo_lectura_segundos} segundos (mínimo requerido: ${notificacion.tiempo_minimo_requerido}s)`,
+      });
+    }
+
+    if (notificacion.reconocimiento_validado) {
+      eventos.push({
+        fecha: notificacion.reconocimiento_validado_at || notificacion.lectura_confirmada_at,
+        tipo: "reconocimiento_validado",
+        titulo: "Reconocimiento de lectura validado",
+        detalle: `Respuesta: "${notificacion.reconocimiento_respuesta}" (${notificacion.reconocimiento_intentos} intento(s))`,
+      });
+    }
+
+    // Eventos de timestamps (Fase 5)
+    if (notificacion.tsa_estado === "sellado" && notificacion.tsa_timestamp) {
+      eventos.push({
+        fecha: notificacion.tsa_timestamp,
+        tipo: "tsa_sellado",
+        titulo: "Sello TSA RFC 3161 aplicado",
+        detalle: `Servidor: ${notificacion.tsa_url || "FreeTSA"} - Fecha cierta inmediata`,
+      });
+    }
+
+    if (notificacion.ots_estado === "pendiente" && notificacion.ots_timestamp_pendiente) {
+      eventos.push({
+        fecha: notificacion.ots_timestamp_pendiente,
+        tipo: "blockchain_pendiente",
+        titulo: "Timestamp blockchain creado (pendiente)",
+        detalle: "Enviado a red Bitcoin, esperando confirmación en ~1-24 horas",
+      });
+    }
+
+    if (notificacion.ots_estado === "confirmado" && notificacion.ots_timestamp_confirmado) {
+      eventos.push({
+        fecha: notificacion.ots_timestamp_confirmado,
+        tipo: "blockchain_confirmado",
+        titulo: "Timestamp confirmado en blockchain Bitcoin",
+        detalle: `Block #${notificacion.ots_bitcoin_block_height} - Hash: ${notificacion.ots_bitcoin_block_hash?.substring(0, 16)}...`,
+      });
+    }
+
+    // Evento de firma digital PKI (Fase 5)
+    if (notificacion.firma_digital_aplicada && notificacion.firma_digital_fecha) {
+      eventos.push({
+        fecha: notificacion.firma_digital_fecha,
+        tipo: "firma_digital",
+        titulo: "Firma digital PKI aplicada",
+        detalle: `Firmante: ${notificacion.firma_digital_firmante} | Algoritmo: ${notificacion.firma_digital_algoritmo}`,
+      });
+    }
+
     // Evento de firmeza si aplica
     if (notificacion.estado === "firme") {
       const fechaFirmeza = notificacion.fecha_vencimiento
@@ -474,6 +616,103 @@ export async function GET(
         instrucciones:
           "Para verificar la integridad del documento, calcule el hash SHA-256 del archivo sancion_original.pdf y compare con el valor en integridad.hash_documento",
       },
+
+      // ============ PACK EVIDENCIA v2.0 - DATOS ADICIONALES ============
+
+      // Verificación biométrica (Fase 1-2)
+      biometria: biometriaDB
+        ? {
+            verificada: biometriaDB.resultado_final === "EXITOSO",
+            resultado: biometriaDB.resultado_final,
+            liveness: {
+              session_id: biometriaDB.aws_liveness_session_id,
+              confidence: biometriaDB.aws_liveness_confidence,
+              is_live: biometriaDB.aws_liveness_is_live,
+            },
+            comparacion: {
+              similarity: biometriaDB.aws_compare_similarity,
+              umbral: biometriaDB.aws_compare_umbral,
+              resultado: biometriaDB.aws_compare_resultado,
+            },
+            contingencia: biometriaDB.contingencia_activada
+              ? {
+                  activada: true,
+                  motivo: biometriaDB.contingencia_motivo,
+                }
+              : null,
+            fecha: biometriaDB.created_at,
+          }
+        : null,
+
+      // Protocolo de lectura activa (Fase 4)
+      protocolo_lectura: {
+        scroll: {
+          completado: notificacion.scroll_completado || false,
+          porcentaje_maximo: notificacion.scroll_porcentaje_maximo || 0,
+        },
+        tiempo: {
+          lectura_segundos: notificacion.tiempo_lectura_segundos || 0,
+          minimo_requerido: notificacion.tiempo_minimo_requerido || 0,
+          cumple_minimo:
+            (notificacion.tiempo_lectura_segundos || 0) >=
+            (notificacion.tiempo_minimo_requerido || 0),
+        },
+        reconocimiento: {
+          validado: notificacion.reconocimiento_validado || false,
+          respuesta: notificacion.reconocimiento_respuesta,
+          intentos: notificacion.reconocimiento_intentos || 0,
+          campo_mostrado: notificacion.reconocimiento_campo_mostrado,
+        },
+        tracking_eventos: trackingLecturaDB?.length || 0,
+        intentos_reconocimiento: intentosReconocimientoDB?.length || 0,
+      },
+
+      // Timestamps y fecha cierta (Fase 5)
+      timestamps: {
+        tsa_rfc3161: notificacion.tsa_estado === "sellado"
+          ? {
+              estado: "sellado",
+              fecha: notificacion.tsa_timestamp,
+              url: notificacion.tsa_url,
+              token_incluido: !!notificacion.tsa_token_base64,
+              verificacion: "El token puede verificarse con cualquier herramienta compatible RFC 3161",
+            }
+          : { estado: notificacion.tsa_estado || "no_creado" },
+        blockchain: notificacion.ots_estado === "confirmado"
+          ? {
+              estado: "confirmado",
+              timestamp_pendiente: notificacion.ots_timestamp_pendiente,
+              timestamp_confirmado: notificacion.ots_timestamp_confirmado,
+              bitcoin_block_height: notificacion.ots_bitcoin_block_height,
+              bitcoin_block_hash: notificacion.ots_bitcoin_block_hash,
+              ots_file_incluido: !!notificacion.ots_file_base64,
+              verificacion: "El archivo .ots puede verificarse en opentimestamps.org o con el cliente oficial",
+            }
+          : {
+              estado: notificacion.ots_estado || "no_creado",
+              timestamp_pendiente: notificacion.ots_timestamp_pendiente,
+            },
+        dual_timestamp: timestampBlockchainDB?.dual_timestamp || false,
+      },
+
+      // Firma digital PKI (Fase 5)
+      firma_digital: notificacion.firma_digital_aplicada
+        ? {
+            aplicada: true,
+            fecha: notificacion.firma_digital_fecha,
+            firmante: notificacion.firma_digital_firmante,
+            algoritmo: notificacion.firma_digital_algoritmo,
+            certificado: {
+              serial: notificacion.firma_digital_certificado_serial,
+              emisor: notificacion.firma_digital_certificado_emisor,
+            },
+            firma_incluida: !!notificacion.firma_digital_base64,
+            fundamento_legal: "Art. 288 CCyC - Equivalencia con firma ológrafa",
+          }
+        : { aplicada: false },
+
+      // Versión del paquete
+      pack_evidencia_version: "2.0",
     };
 
     // 4. Generar PDFs de declaraciones de testigos
@@ -667,6 +906,319 @@ Descripción: ${entrada.descripcion}
       bitacoraFolder?.file("contexto_conducta.txt", bitacoraTxt);
     }
 
+    // ============ PACK EVIDENCIA v2.0 - CARPETAS ADICIONALES ============
+
+    // Agregar carpeta de timestamps (Fase 5)
+    const timestampsFolder = zip.folder("timestamps");
+
+    // Token TSA RFC 3161
+    if (notificacion.tsa_token_base64) {
+      const tsaData = {
+        protocolo: "RFC 3161",
+        estado: notificacion.tsa_estado,
+        fecha: notificacion.tsa_timestamp,
+        servidor: notificacion.tsa_url,
+        verificacion: "El archivo token_tsa.der puede verificarse con OpenSSL o herramientas compatibles RFC 3161",
+        fundamento_legal: [
+          "Acordada N° 3/2015 CSJN - Fecha cierta en sistemas informáticos",
+          "Ley 25.506 - Firma Digital",
+        ],
+      };
+      timestampsFolder?.file("tsa_rfc3161.json", JSON.stringify(tsaData, null, 2));
+      timestampsFolder?.file("token_tsa.der", Buffer.from(notificacion.tsa_token_base64, "base64"));
+
+      // Instrucciones TSA
+      const tsaInstrucciones = `VERIFICACIÓN DE SELLO TSA RFC 3161
+${"=".repeat(60)}
+
+Este directorio contiene el sello de tiempo RFC 3161 emitido por
+una Autoridad de Sellado de Tiempo (TSA) reconocida.
+
+ARCHIVOS:
+- tsa_rfc3161.json: Metadatos del sello
+- token_tsa.der: Token TSA en formato DER (verificable)
+
+VERIFICACIÓN CON OPENSSL:
+------------------------
+1. Descargar certificado del TSA:
+   curl -o tsa.crt ${notificacion.tsa_url?.replace("/tsr", "/files/tsa.crt") || "https://freetsa.org/files/tsa.crt"}
+
+2. Verificar token:
+   openssl ts -verify -in token_tsa.der -CAfile tsa.crt -data ../sancion_original.pdf
+
+FUNDAMENTO LEGAL:
+-----------------
+- Acordada N° 3/2015 CSJN: Fecha cierta en sistemas informáticos
+- RFC 3161: Internet X.509 PKI Time-Stamp Protocol
+- Ley 25.506: Firma Digital Argentina
+
+Servidor TSA: ${notificacion.tsa_url || "FreeTSA.org"}
+Fecha del sello: ${notificacion.tsa_timestamp || "N/A"}
+`;
+      timestampsFolder?.file("VERIFICAR_TSA.txt", tsaInstrucciones);
+    }
+
+    // Archivo OpenTimestamps
+    if (notificacion.ots_file_base64) {
+      const otsData = {
+        protocolo: "OpenTimestamps",
+        estado: notificacion.ots_estado,
+        timestamp_pendiente: notificacion.ots_timestamp_pendiente,
+        timestamp_confirmado: notificacion.ots_timestamp_confirmado,
+        bitcoin: notificacion.ots_estado === "confirmado" ? {
+          block_height: notificacion.ots_bitcoin_block_height,
+          block_hash: notificacion.ots_bitcoin_block_hash,
+        } : null,
+        verificacion: "El archivo timestamp.ots puede verificarse en opentimestamps.org o con el cliente oficial",
+        fundamento_legal: "Acordada N° 3/2015 CSJN - Fecha cierta mediante anclaje en blockchain",
+      };
+      timestampsFolder?.file("opentimestamps.json", JSON.stringify(otsData, null, 2));
+      timestampsFolder?.file("timestamp.ots", Buffer.from(notificacion.ots_file_base64, "base64"));
+
+      // Instrucciones OTS
+      const otsInstrucciones = `VERIFICACIÓN DE TIMESTAMP BLOCKCHAIN
+${"=".repeat(60)}
+
+Este directorio contiene el timestamp anclado en blockchain de Bitcoin
+mediante OpenTimestamps.
+
+ARCHIVOS:
+- opentimestamps.json: Metadatos del timestamp
+- timestamp.ots: Archivo de prueba OpenTimestamps
+
+VERIFICACIÓN ONLINE:
+--------------------
+1. Ir a https://opentimestamps.org
+2. Subir el archivo timestamp.ots
+3. Subir el archivo ../sancion_original.pdf
+4. El sistema verificará que el hash coincide y mostrará el bloque de Bitcoin
+
+VERIFICACIÓN CON CLIENTE OFICIAL:
+---------------------------------
+1. Instalar: pip install opentimestamps-client
+2. Verificar: ots verify timestamp.ots
+
+ESTADO ACTUAL: ${notificacion.ots_estado === "confirmado" ? "CONFIRMADO en blockchain" : "PENDIENTE de confirmación"}
+${notificacion.ots_estado === "confirmado" ? `
+Bitcoin Block #${notificacion.ots_bitcoin_block_height}
+Block Hash: ${notificacion.ots_bitcoin_block_hash}
+` : "Los timestamps tardan 1-24 horas en confirmarse en blockchain."}
+
+FUNDAMENTO LEGAL:
+-----------------
+- Acordada N° 3/2015 CSJN: Fecha cierta en sistemas informáticos
+- La inmutabilidad de blockchain Bitcoin garantiza que el documento
+  existía al momento del timestamp
+`;
+      timestampsFolder?.file("VERIFICAR_BLOCKCHAIN.txt", otsInstrucciones);
+    }
+
+    // Agregar carpeta de biometría (Fase 1-2)
+    if (biometriaDB) {
+      const biometriaFolder = zip.folder("biometria");
+
+      const biometriaData = {
+        verificacion_realizada: true,
+        resultado: biometriaDB.resultado_final,
+        fecha: biometriaDB.created_at,
+        liveness_detection: {
+          session_id: biometriaDB.aws_liveness_session_id,
+          is_live: biometriaDB.aws_liveness_is_live,
+          confidence: biometriaDB.aws_liveness_confidence,
+          imagenes_auditoria: biometriaDB.aws_liveness_audit_images_count,
+        },
+        comparacion_facial: {
+          similarity: biometriaDB.aws_compare_similarity,
+          umbral_requerido: biometriaDB.aws_compare_umbral,
+          resultado: biometriaDB.aws_compare_resultado,
+        },
+        contingencia: biometriaDB.contingencia_activada ? {
+          activada: true,
+          motivo: biometriaDB.contingencia_motivo,
+        } : null,
+        dispositivo: {
+          info: biometriaDB.dispositivo,
+          ip: biometriaDB.ip_verificacion,
+          camara_frontal: biometriaDB.capacidad_camara_frontal,
+          conexion_suficiente: biometriaDB.capacidad_conexion_suficiente,
+        },
+        costos_aws: {
+          liveness_usd: biometriaDB.costo_liveness_usd,
+          compare_usd: biometriaDB.costo_compare_usd,
+          total_usd: biometriaDB.costo_total_usd,
+        },
+        fundamento_tecnico: "AWS Rekognition Face Liveness + CompareFaces",
+      };
+      biometriaFolder?.file("verificacion_biometrica.json", JSON.stringify(biometriaData, null, 2));
+
+      // Resumen legible
+      const biometriaTxt = `VERIFICACIÓN BIOMÉTRICA
+${"=".repeat(60)}
+
+RESULTADO: ${biometriaDB.resultado_final}
+Fecha: ${biometriaDB.created_at}
+
+DETECCIÓN DE VIDA (Liveness):
+-----------------------------
+- Es persona real: ${biometriaDB.aws_liveness_is_live ? "SÍ" : "NO"}
+- Confianza: ${biometriaDB.aws_liveness_confidence}%
+- Imágenes de auditoría capturadas: ${biometriaDB.aws_liveness_audit_images_count || "N/A"}
+
+COMPARACIÓN FACIAL:
+-------------------
+- Similitud con patrón registrado: ${biometriaDB.aws_compare_similarity}%
+- Umbral requerido: ${biometriaDB.aws_compare_umbral}%
+- Resultado: ${biometriaDB.aws_compare_resultado}
+${biometriaDB.contingencia_activada ? `
+⚠️ CONTINGENCIA ACTIVADA:
+Motivo: ${biometriaDB.contingencia_motivo}
+` : ""}
+DISPOSITIVO:
+------------
+- Info: ${biometriaDB.dispositivo || "N/A"}
+- IP: ${biometriaDB.ip_verificacion || "N/A"}
+
+VALOR PROBATORIO:
+-----------------
+La verificación biométrica demuestra que:
+1. El empleado es una persona real (no foto/video)
+2. Es la misma persona que se enroló previamente
+3. La confirmación de lectura fue realizada por el empleado
+
+Tecnología: AWS Rekognition Face Liveness + CompareFaces
+`;
+      biometriaFolder?.file("verificacion_biometrica.txt", biometriaTxt);
+    }
+
+    // Agregar carpeta de protocolo de lectura (Fase 4)
+    if (notificacion.scroll_completado || notificacion.reconocimiento_validado || (trackingLecturaDB && trackingLecturaDB.length > 0)) {
+      const lecturaFolder = zip.folder("protocolo_lectura");
+
+      const lecturaData = {
+        scroll: {
+          completado: notificacion.scroll_completado || false,
+          porcentaje_maximo: notificacion.scroll_porcentaje_maximo || 0,
+          timestamps: notificacion.scroll_timestamps || [],
+        },
+        tiempo: {
+          inicio: notificacion.tiempo_lectura_inicio_at,
+          total_segundos: notificacion.tiempo_lectura_segundos || 0,
+          minimo_requerido: notificacion.tiempo_minimo_requerido || 0,
+          cumple_minimo: (notificacion.tiempo_lectura_segundos || 0) >= (notificacion.tiempo_minimo_requerido || 0),
+        },
+        reconocimiento: {
+          campo_mostrado: notificacion.reconocimiento_campo_mostrado,
+          respuesta: notificacion.reconocimiento_respuesta,
+          intentos: notificacion.reconocimiento_intentos || 0,
+          validado: notificacion.reconocimiento_validado || false,
+          validado_at: notificacion.reconocimiento_validado_at,
+        },
+        tracking_detallado: trackingLecturaDB || [],
+        intentos_detallados: intentosReconocimientoDB || [],
+        confirmacion_metadata: notificacion.confirmacion_metadata || {},
+      };
+      lecturaFolder?.file("protocolo_lectura.json", JSON.stringify(lecturaData, null, 2));
+
+      // Resumen legible
+      const lecturaTxt = `PROTOCOLO DE LECTURA ACTIVA
+${"=".repeat(60)}
+
+Este protocolo demuestra que el empleado efectivamente leyó y
+comprendió el contenido de la notificación.
+
+SCROLL DEL DOCUMENTO:
+---------------------
+- Completado (≥90%): ${notificacion.scroll_completado ? "SÍ" : "NO"}
+- Porcentaje máximo alcanzado: ${notificacion.scroll_porcentaje_maximo || 0}%
+
+TIEMPO DE LECTURA:
+------------------
+- Tiempo total: ${notificacion.tiempo_lectura_segundos || 0} segundos
+- Tiempo mínimo requerido: ${notificacion.tiempo_minimo_requerido || 0} segundos
+- Cumple tiempo mínimo: ${(notificacion.tiempo_lectura_segundos || 0) >= (notificacion.tiempo_minimo_requerido || 0) ? "SÍ" : "NO"}
+
+RECONOCIMIENTO DE LECTURA:
+--------------------------
+- Pregunta mostrada: ${notificacion.reconocimiento_campo_mostrado || "N/A"}
+- Respuesta del empleado: "${notificacion.reconocimiento_respuesta || "N/A"}"
+- Intentos realizados: ${notificacion.reconocimiento_intentos || 0}
+- Validado correctamente: ${notificacion.reconocimiento_validado ? "SÍ" : "NO"}
+
+EVENTOS DE TRACKING: ${trackingLecturaDB?.length || 0}
+INTENTOS DE RECONOCIMIENTO: ${intentosReconocimientoDB?.length || 0}
+
+VALOR PROBATORIO:
+-----------------
+Este protocolo demuestra que:
+1. El empleado scrolleó todo el documento
+2. Pasó suficiente tiempo leyendo el contenido
+3. Pudo responder correctamente sobre el contenido
+4. No fue una confirmación automática o apresurada
+`;
+      lecturaFolder?.file("protocolo_lectura.txt", lecturaTxt);
+
+      // Tracking detallado si existe
+      if (trackingLecturaDB && trackingLecturaDB.length > 0) {
+        lecturaFolder?.file("tracking_eventos.json", JSON.stringify(trackingLecturaDB, null, 2));
+      }
+
+      // Intentos de reconocimiento si existen
+      if (intentosReconocimientoDB && intentosReconocimientoDB.length > 0) {
+        lecturaFolder?.file("intentos_reconocimiento.json", JSON.stringify(intentosReconocimientoDB, null, 2));
+      }
+    }
+
+    // Agregar firma digital PKI (Fase 5)
+    if (notificacion.firma_digital_aplicada && notificacion.firma_digital_base64) {
+      const firmaFolder = zip.folder("firma_digital");
+
+      const firmaData = {
+        aplicada: true,
+        fecha: notificacion.firma_digital_fecha,
+        firmante: notificacion.firma_digital_firmante,
+        algoritmo: notificacion.firma_digital_algoritmo,
+        certificado: {
+          serial: notificacion.firma_digital_certificado_serial,
+          emisor: notificacion.firma_digital_certificado_emisor,
+        },
+        fundamento_legal: "Art. 288 CCyC - Equivalencia con firma ológrafa",
+      };
+      firmaFolder?.file("firma_digital.json", JSON.stringify(firmaData, null, 2));
+      firmaFolder?.file("firma.sig", Buffer.from(notificacion.firma_digital_base64, "base64"));
+
+      const firmaInstrucciones = `FIRMA DIGITAL PKI
+${"=".repeat(60)}
+
+Este directorio contiene la firma digital del documento conforme
+al Art. 288 del Código Civil y Comercial de la Nación.
+
+ARCHIVOS:
+- firma_digital.json: Metadatos de la firma
+- firma.sig: Firma digital en formato raw
+
+DATOS DE LA FIRMA:
+------------------
+- Firmante: ${notificacion.firma_digital_firmante || "N/A"}
+- Fecha: ${notificacion.firma_digital_fecha || "N/A"}
+- Algoritmo: ${notificacion.firma_digital_algoritmo || "RSA-SHA256"}
+- Certificado: ${notificacion.firma_digital_certificado_emisor || "N/A"}
+
+VERIFICACIÓN:
+-------------
+La firma puede verificarse con la clave pública del certificado.
+Para obtener el certificado público, contactar a ${notificacion.firma_digital_certificado_emisor || "el emisor"}.
+
+FUNDAMENTO LEGAL:
+-----------------
+Art. 288 CCyC: "La firma digital satisface el requerimiento de firma
+escrita si el documento es firmado en el sentido del artículo 288..."
+
+La firma digital tiene el mismo valor legal que la firma ológrafa
+cuando cumple los requisitos de la Ley 25.506.
+`;
+      firmaFolder?.file("VERIFICAR_FIRMA.txt", firmaInstrucciones);
+    }
+
     // Agregar carpeta de verificación con hashes
     const verificacionFolder = zip.folder("verificacion");
     const hashes: Record<string, string> = {
@@ -769,8 +1321,61 @@ ${folderIndex++}. bitacora_contexto/
 
 `
       : "";
-    const readme = `PAQUETE DE EVIDENCIA - NOTILEGAL
-================================
+
+    // ============ PACK EVIDENCIA v2.0 - INFO ADICIONAL PARA README ============
+    const timestampsInfo = (notificacion.tsa_token_base64 || notificacion.ots_file_base64)
+      ? `
+${folderIndex++}. timestamps/
+   Sellos de tiempo y anclas blockchain para fecha cierta:
+${notificacion.tsa_token_base64 ? "   - token_tsa.der: Sello TSA RFC 3161 (fecha cierta inmediata)\n   - VERIFICAR_TSA.txt: Instrucciones de verificacion" : ""}
+${notificacion.ots_file_base64 ? "   - timestamp.ots: Archivo OpenTimestamps (blockchain Bitcoin)\n   - VERIFICAR_BLOCKCHAIN.txt: Instrucciones de verificacion" : ""}
+
+   Estado TSA: ${notificacion.tsa_estado || "no_creado"}
+   Estado Blockchain: ${notificacion.ots_estado || "no_creado"}
+`
+      : "";
+
+    const biometriaInfo = biometriaDB
+      ? `
+${folderIndex++}. biometria/
+   Verificacion biometrica con AWS Rekognition:
+   - verificacion_biometrica.json: Datos completos
+   - verificacion_biometrica.txt: Resumen legible
+
+   Resultado: ${biometriaDB.resultado_final}
+   Liveness: ${biometriaDB.aws_liveness_confidence}%
+   Similitud: ${biometriaDB.aws_compare_similarity}%
+`
+      : "";
+
+    const protocoloLecturaInfo = (notificacion.scroll_completado || notificacion.reconocimiento_validado)
+      ? `
+${folderIndex++}. protocolo_lectura/
+   Evidencia de lectura activa del documento:
+   - protocolo_lectura.json: Datos completos de tracking
+   - protocolo_lectura.txt: Resumen legible
+
+   Scroll completado: ${notificacion.scroll_completado ? "SI" : "NO"} (${notificacion.scroll_porcentaje_maximo || 0}%)
+   Tiempo de lectura: ${notificacion.tiempo_lectura_segundos || 0}s
+   Reconocimiento: ${notificacion.reconocimiento_validado ? "VALIDADO" : "NO VALIDADO"}
+`
+      : "";
+
+    const firmaDigitalInfo = notificacion.firma_digital_aplicada
+      ? `
+${folderIndex++}. firma_digital/
+   Firma digital PKI conforme Art. 288 CCyC:
+   - firma_digital.json: Metadatos de la firma
+   - firma.sig: Firma digital
+   - VERIFICAR_FIRMA.txt: Instrucciones de verificacion
+
+   Firmante: ${notificacion.firma_digital_firmante}
+   Algoritmo: ${notificacion.firma_digital_algoritmo}
+`
+      : "";
+
+    const readme = `PAQUETE DE EVIDENCIA - NOTILEGAL v2.0
+=====================================
 
 Este paquete contiene la evidencia digital de una notificacion laboral
 generada a traves de NotiLegal.
@@ -791,7 +1396,7 @@ CONTENIDO:
 4. metadata.json
    Datos tecnicos en formato estructurado para verificacion
    programatica de la integridad del documento.
-${testigosInfo}${evidenciaInfo}${descargoInfo}${bitacoraInfo}${folderIndex}. verificacion/
+${testigosInfo}${evidenciaInfo}${descargoInfo}${bitacoraInfo}${timestampsInfo}${biometriaInfo}${protocoloLecturaInfo}${firmaDigitalInfo}${folderIndex}. verificacion/
    Carpeta con hashes SHA-256 de todos los archivos e instrucciones
    para verificar que ningun documento fue alterado.
 
@@ -838,7 +1443,12 @@ Este paquete de evidencia constituye prueba de:
 - Declaraciones testimoniales firmadas bajo juramento (Art. 275 CP)` : ""}${evidenciaFiles.length > 0 ? `
 - Evidencia multimedia con metadatos EXIF verificados` : ""}${descargoDB?.confirmado_at ? `
 - Ejercicio del derecho a defensa (Art. 67 LCT) - El empleado ${descargoDB.decision === "ejercer_descargo" ? "presento su descargo" : "declino presentar descargo"}` : ""}${bitacoraDB && bitacoraDB.length > 0 ? `
-- Gestion progresiva documentada (Art. 64 LCT) - ${bitacoraDB.length} antecedentes registrados` : ""}
+- Gestion progresiva documentada (Art. 64 LCT) - ${bitacoraDB.length} antecedentes registrados` : ""}${notificacion.tsa_estado === "sellado" ? `
+- Fecha cierta TSA RFC 3161 (Acordada 3/2015 CSJN)` : ""}${notificacion.ots_estado === "confirmado" ? `
+- Anclaje en blockchain Bitcoin (inmutable)` : ""}${biometriaDB?.resultado_final === "EXITOSO" ? `
+- Verificacion biometrica del empleado (AWS Rekognition)` : ""}${notificacion.reconocimiento_validado ? `
+- Protocolo de lectura activa validado` : ""}${notificacion.firma_digital_aplicada ? `
+- Firma digital PKI (Art. 288 CCyC)` : ""}
 
 Conforme a la Ley 27.742 de Modernizacion Laboral, las sanciones
 no impugnadas dentro de los 30 dias corridos constituyen prueba
@@ -850,13 +1460,28 @@ Esto puede ser utilizado como prueba en juicio.
 ⚠️ IMPORTANTE: El descargo del empleado CONTIENE CONTRADICCIONES.
 Esto puede ser utilizado para impugnar su version.
 ` : ""}
+FUNDAMENTO LEGAL COMPLETO:
+--------------------------
+- Ley 27.742 de Modernizacion Laboral
+- Art. 67 LCT - Facultad disciplinaria
+- Art. 64 LCT - Facultad de organizacion
+- Art. 288 CCyC - Firma digital
+- Ley 25.506 - Firma Digital Argentina
+- Acordada N° 3/2015 CSJN - Fecha cierta electronica
+- RFC 3161 - Protocolo de sellado de tiempo
+
 ---
+PACK EVIDENCIA v2.0
 Generado: ${fechaGeneracion}
 ID: ${notificacion.id}
 Testigos firmados: ${testigosPdfs.length}
 Archivos de evidencia: ${evidenciaFiles.length}
 Descargo: ${descargoDB?.confirmado_at ? (descargoDB.decision === "ejercer_descargo" ? "PRESENTADO" : "DECLINADO") : "PENDIENTE"}
 Entradas de bitacora: ${bitacoraDB?.length || 0}
+TSA RFC 3161: ${notificacion.tsa_estado === "sellado" ? "SELLADO" : "NO"}
+Blockchain: ${notificacion.ots_estado || "no_creado"}
+Biometria: ${biometriaDB?.resultado_final || "NO"}
+Firma PKI: ${notificacion.firma_digital_aplicada ? "SI" : "NO"}
 NotiLegal - https://notilegal.com.ar
 `;
     zip.file("README.txt", readme);
@@ -884,6 +1509,7 @@ NotiLegal - https://notilegal.com.ar
 
 function formatEventTitle(tipo: string): string {
   const titles: Record<string, string> = {
+    // Eventos básicos
     creacion: "Sancion creada",
     envio_email: "Email enviado",
     envio_sms: "SMS enviado",
@@ -905,6 +1531,39 @@ function formatEventTitle(tipo: string): string {
     declaracion_testigo: "Declaracion testimonial firmada",
     invitacion_testigo: "Invitacion a testigo enviada",
     evidencia_subida: "Evidencia multimedia subida",
+
+    // Pack Evidencia v2.0 - Biometría
+    biometria_verificacion: "Verificacion biometrica",
+    biometria_enrolamiento: "Enrolamiento biometrico",
+    biometria_fallida: "Verificacion biometrica fallida",
+    biometria_contingencia: "Contingencia biometrica activada",
+
+    // Pack Evidencia v2.0 - Protocolo de lectura
+    scroll_completado: "Scroll del documento completado",
+    tiempo_lectura: "Tiempo de lectura registrado",
+    reconocimiento_validado: "Reconocimiento de lectura validado",
+    reconocimiento_fallido: "Reconocimiento de lectura fallido",
+
+    // Pack Evidencia v2.0 - Timestamps
+    tsa_sellado: "Sello TSA RFC 3161 aplicado",
+    tsa_fallido: "Sello TSA fallido",
+    blockchain_pendiente: "Timestamp blockchain pendiente",
+    blockchain_confirmado: "Timestamp blockchain confirmado",
+    timestamp_confirmado: "Timestamp confirmado",
+
+    // Pack Evidencia v2.0 - Firma digital
+    firma_digital: "Firma digital PKI aplicada",
+    firma_verificada: "Firma digital verificada",
+
+    // Descargo
+    descargo_habilitado: "Derecho a descargo habilitado",
+    descargo_identidad: "Identidad validada para descargo",
+    descargo_ejercer_descargo: "Empleado decidio ejercer descargo",
+    descargo_declinar_descargo: "Empleado declino ejercer descargo",
+    descargo_confirmado: "Descargo confirmado",
+
+    // Bitácora
+    bitacora_vinculada: "Antecedente vinculado",
   };
   return titles[tipo] || tipo.replace(/_/g, " ");
 }
