@@ -1,6 +1,6 @@
 # RESUMEN DE IMPLEMENTACIÓN - NOTILEGAL V2
 
-## Estado Actual: Fase 3 Pendiente
+## Estado Actual: Fase 5 Pendiente (Firma PKI / TSA)
 
 ---
 
@@ -52,48 +52,76 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 
 ---
 
-## ⏳ SIGUIENTE: Fase 3 - Webhooks + Reconciliación
+## ✅ COMPLETADO: Fase 3 - Webhooks + Reconciliación
 
-### Qué implementar:
+**Commit:** `6e93106`
 
-1. **Webhooks SendGrid** (`/api/webhooks/sendgrid`)
-   - Eventos: delivered, opened, clicked, bounced, dropped
-   - Actualizar estado de notificación en BD
+### Archivos creados:
+- `src/lib/webhooks/verify.ts` - Verificación de firmas
+- `src/lib/webhooks/reconciliacion.ts` - Sistema de reconciliación
+- `src/lib/webhooks/index.ts` - Exports
+- `src/app/api/cron/reconciliar/route.ts` - Endpoint cron
+- `supabase/migrations/20260121000001_webhooks_reconciliacion.sql`
 
-2. **Webhooks Twilio** (`/api/webhooks/twilio`)
-   - Eventos: delivered, failed, undelivered
-   - Actualizar estado de notificación en BD
+### Funcionalidades:
+- Verificación de firma para webhooks SendGrid/Twilio
+- Logging en tabla `webhook_logs` para auditoría
+- Sistema de reconciliación cada 6 horas
+- Grace period de 6 horas antes de subsidiariedad
+- Tablas: `webhook_logs`, `reconciliacion_logs`
 
-3. **Sistema de Reconciliación**
-   - Job cada 6 horas
-   - Consultar API de SendGrid/Twilio para estados pendientes
-   - Sincronizar estados que no llegaron por webhook
+---
 
-4. **Grace Period**
-   - 6 horas extra antes de activar subsidiariedad física
-   - Permitir que webhooks retrasados lleguen
+## ✅ COMPLETADO: Fase 4 - Protocolo de Lectura Activa
 
-### Archivos a crear:
-- `src/app/api/webhooks/sendgrid/route.ts` (ya existe, verificar/mejorar)
-- `src/app/api/webhooks/twilio/route.ts` (ya existe, verificar/mejorar)
-- `src/lib/reconciliacion/` - Lógica de reconciliación
-- `src/app/api/cron/reconciliar/route.ts` - Endpoint para cron job
+### Implementado:
+
+1. **Tracking de scroll invisible**
+   - `ScrollTracker` component sin indicadores visuales
+   - Detecta scroll >= 90% del documento
+   - Tracking de tiempo de lectura (mínimo calculado por palabras)
+   - Envía eventos a `/api/ver/[token]/tracking`
+
+2. **Campo de texto libre para reconocimiento**
+   - `ReconocimientoLectura` component reemplaza checkbox
+   - Preguntas dinámicas según tipo de sanción
+   - Validación fuzzy matching (acepta variaciones)
+   - 3 intentos permitidos
+
+3. **Archivos creados/modificados:**
+   - `supabase/migrations/20260121000002_protocolo_lectura_activa.sql`
+   - `src/components/ver/scroll-tracker.tsx`
+   - `src/components/ver/reconocimiento-lectura.tsx`
+   - `src/components/ver/contenido-notificacion.tsx` (actualizado)
+   - `src/app/api/ver/[token]/tracking/route.ts` (actualizado)
+   - `src/app/api/ver/[token]/confirmar/route.ts` (actualizado)
+
+4. **Tablas creadas:**
+   - `tracking_lectura` - Eventos de scroll/tiempo
+   - `intentos_reconocimiento` - Historial de validación
+
+5. **Campos agregados a notificaciones:**
+   - `scroll_completado`, `scroll_porcentaje_maximo`
+   - `tiempo_lectura_segundos`, `tiempo_minimo_requerido`
+   - `reconocimiento_respuesta`, `reconocimiento_intentos`
+   - `reconocimiento_validado`, `confirmacion_metadata`
 
 ---
 
 ## PENDIENTE (Orden de prioridad)
 
-| Fase | Componente | Prioridad |
-|------|-----------|-----------|
-| 3 | Webhooks + Reconciliación | CRÍTICA |
-| 4 | Protocolo Lectura Activa | ALTA |
-| 5 | Firma PKI (TSA) | ALTA |
-| 6 | Pack Evidencia v2.0 | ALTA |
-| 7 | Contingencia Conectividad | ALTA |
-| 8 | RENAPER (opcional) | MEDIA |
-| 9 | Subsidiariedad Física | MEDIA |
-| 10 | Testing/Auditoría | CRÍTICA |
-| 11 | Piloto 3 clientes | CRÍTICA |
+| Fase | Componente | Prioridad | Estado |
+|------|-----------|-----------|--------|
+| 1-2 | Biometría AWS Rekognition | CRÍTICA | ✅ |
+| 3 | Webhooks + Reconciliación | CRÍTICA | ✅ |
+| 4 | Protocolo Lectura Activa | ALTA | ✅ |
+| 5 | Firma PKI (TSA) | ALTA | ⏳ Siguiente |
+| 6 | Pack Evidencia v2.0 | ALTA | Pendiente |
+| 7 | Contingencia Conectividad | ALTA | Pendiente |
+| 8 | RENAPER (opcional) | MEDIA | Pendiente |
+| 9 | Subsidiariedad Física | MEDIA | Pendiente |
+| 10 | Testing/Auditoría | CRÍTICA | Pendiente |
+| 11 | Piloto 3 clientes | CRÍTICA | Pendiente |
 
 ---
 

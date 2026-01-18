@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -14,7 +15,8 @@ import {
   Clock,
 } from "lucide-react";
 import { formatearCUIL } from "@/lib/validators";
-import { CheckboxDeclaracionJurada } from "./checkbox-declaracion-jurada";
+import { ScrollTracker, useScrollTracking } from "./scroll-tracker";
+import { ReconocimientoLectura } from "./reconocimiento-lectura";
 
 interface NotificacionData {
   id: string;
@@ -32,6 +34,7 @@ interface NotificacionData {
   fecha_fin_suspension?: string;
   lectura_confirmada_at?: string | null;
   fecha_lectura?: string | null;
+  tiempo_minimo_requerido?: number;
 }
 
 interface EmpresaData {
@@ -59,6 +62,24 @@ export function ContenidoNotificacion({
   lecturaConfirmada,
   onLecturaConfirmada,
 }: ContenidoNotificacionProps) {
+  // Hook para tracking de scroll y tiempo
+  const tiempoMinimo = notificacion.tiempo_minimo_requerido || 30;
+  const {
+    puedeConfirmar,
+    scrollCompletado,
+    tiempoCompletado,
+    onScrollComplete,
+    onTimeComplete,
+  } = useScrollTracking(notificacion.token, tiempoMinimo);
+
+  // Estado local para confirmación
+  const [confirmadoLocal, setConfirmadoLocal] = useState(false);
+
+  const handleConfirmado = () => {
+    setConfirmadoLocal(true);
+    onLecturaConfirmada();
+  };
+
   const formatDate = (date: string) => {
     return new Date(date).toLocaleDateString("es-AR", {
       day: "2-digit",
@@ -93,6 +114,9 @@ export function ContenidoNotificacion({
       )
     : null;
 
+  // Si ya está confirmado, mostrar sin tracking
+  const yaConfirmado = lecturaConfirmada || confirmadoLocal;
+
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Header */}
@@ -118,7 +142,7 @@ export function ContenidoNotificacion({
         </div>
 
         {/* Estado de lectura confirmada */}
-        {lecturaConfirmada && (
+        {yaConfirmado && (
           <Card className="border-green-200 bg-green-50">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -141,7 +165,7 @@ export function ContenidoNotificacion({
         )}
 
         {/* Estado - Plazo de impugnación */}
-        {!lecturaConfirmada && notificacion.estado !== "firme" && diasRestantes !== null && (
+        {!yaConfirmado && notificacion.estado !== "firme" && diasRestantes !== null && (
           <Card
             className={`${
               diasRestantes <= 5
@@ -198,163 +222,178 @@ export function ContenidoNotificacion({
           </Card>
         )}
 
-        {/* Datos del Empleador */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Building2 className="h-5 w-5" />
-              Empleador
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Razón Social</p>
-              <p className="font-medium">{empresa?.razon_social || "No disponible"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">CUIT</p>
-              <p className="font-mono">{empresa?.cuit ? formatearCUIL(empresa.cuit) : "-"}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Datos del Empleado */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <User className="h-5 w-5" />
-              Empleado Notificado
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-sm text-muted-foreground">Nombre Completo</p>
-              <p className="font-medium">{empleado?.nombre || "No disponible"}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">CUIL</p>
-              <p className="font-mono">
-                {empleado?.cuil ? formatearCUIL(empleado.cuil) : "-"}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Detalles de la Sanción */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileText className="h-5 w-5" />
-              Detalles de la Sanción
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm text-muted-foreground">Tipo</p>
-                <p className="font-medium capitalize">{tipoLabel}</p>
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Fecha del Hecho</p>
-                <p className="font-medium">{formatDate(notificacion.fecha_hecho)}</p>
-              </div>
-            </div>
-
-            {/* Días de suspensión si aplica */}
-            {notificacion.tipo === "suspension" && notificacion.dias_suspension && (
-              <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+        {/* Contenido del documento - con tracking de scroll si no está confirmado */}
+        <ScrollTracker
+          token={notificacion.token}
+          onScrollComplete={onScrollComplete}
+          onTimeComplete={onTimeComplete}
+          tiempoMinimoSegundos={tiempoMinimo}
+          scrollMinimo={90}
+        >
+          <div className="space-y-6">
+            {/* Datos del Empleador */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Building2 className="h-5 w-5" />
+                  Empleador
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div>
-                  <p className="text-sm text-muted-foreground">Días de Suspensión</p>
-                  <p className="font-medium">{notificacion.dias_suspension} días</p>
+                  <p className="text-sm text-muted-foreground">Razón Social</p>
+                  <p className="font-medium">{empresa?.razon_social || "No disponible"}</p>
                 </div>
-                {notificacion.fecha_inicio_suspension && notificacion.fecha_fin_suspension && (
+                <div>
+                  <p className="text-sm text-muted-foreground">CUIT</p>
+                  <p className="font-mono">{empresa?.cuit ? formatearCUIL(empresa.cuit) : "-"}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Datos del Empleado */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <User className="h-5 w-5" />
+                  Empleado Notificado
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Nombre Completo</p>
+                  <p className="font-medium">{empleado?.nombre || "No disponible"}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">CUIL</p>
+                  <p className="font-mono">
+                    {empleado?.cuil ? formatearCUIL(empleado.cuil) : "-"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Detalles de la Sanción */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <FileText className="h-5 w-5" />
+                  Detalles de la Sanción
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <p className="text-sm text-muted-foreground">Período</p>
-                    <p className="font-medium">
-                      {formatDate(notificacion.fecha_inicio_suspension)} -{" "}
-                      {formatDate(notificacion.fecha_fin_suspension)}
+                    <p className="text-sm text-muted-foreground">Tipo</p>
+                    <p className="font-medium capitalize">{tipoLabel}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-muted-foreground">Fecha del Hecho</p>
+                    <p className="font-medium">{formatDate(notificacion.fecha_hecho)}</p>
+                  </div>
+                </div>
+
+                {/* Días de suspensión si aplica */}
+                {notificacion.tipo === "suspension" && notificacion.dias_suspension && (
+                  <div className="grid grid-cols-2 gap-4 pt-2 border-t">
+                    <div>
+                      <p className="text-sm text-muted-foreground">Días de Suspensión</p>
+                      <p className="font-medium">{notificacion.dias_suspension} días</p>
+                    </div>
+                    {notificacion.fecha_inicio_suspension && notificacion.fecha_fin_suspension && (
+                      <div>
+                        <p className="text-sm text-muted-foreground">Período</p>
+                        <p className="font-medium">
+                          {formatDate(notificacion.fecha_inicio_suspension)} -{" "}
+                          {formatDate(notificacion.fecha_fin_suspension)}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                <div>
+                  <p className="text-sm text-muted-foreground">Motivo</p>
+                  <p className="font-medium">{notificacion.motivo}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Descripción de los Hechos</p>
+                  <div className="bg-slate-50 p-4 rounded-lg mt-1">
+                    <p className="text-sm whitespace-pre-wrap">{notificacion.descripcion}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Verificación Criptográfica */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-lg">
+                  <Hash className="h-5 w-5" />
+                  Verificación de Autenticidad
+                </CardTitle>
+                <CardDescription>
+                  Este documento está protegido criptográficamente
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div>
+                  <p className="text-sm text-muted-foreground">ID de Notificación</p>
+                  <p className="font-mono text-xs bg-slate-100 p-2 rounded">
+                    {notificacion.id}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Timestamp de Generación</p>
+                  <p className="font-mono text-sm">{notificacion.timestamp_generacion}</p>
+                </div>
+                {notificacion.hash_sha256 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground">Hash SHA-256</p>
+                    <p className="font-mono text-xs bg-slate-100 p-2 rounded break-all">
+                      {notificacion.hash_sha256}
                     </p>
                   </div>
                 )}
-              </div>
-            )}
+              </CardContent>
+            </Card>
 
-            <div>
-              <p className="text-sm text-muted-foreground">Motivo</p>
-              <p className="font-medium">{notificacion.motivo}</p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Descripción de los Hechos</p>
-              <div className="bg-slate-50 p-4 rounded-lg mt-1">
-                <p className="text-sm whitespace-pre-wrap">{notificacion.descripcion}</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+            {/* Aviso Legal */}
+            <Card className="border-blue-200 bg-blue-50">
+              <CardContent className="pt-6">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
+                  <div>
+                    <h4 className="font-semibold text-blue-900 mb-2">
+                      Información Legal Importante
+                    </h4>
+                    <p className="text-sm text-blue-700 mb-2">
+                      De acuerdo con la Ley 27.742 de Modernización Laboral, usted tiene{" "}
+                      <strong>30 días corridos</strong> desde la confirmación de esta
+                      notificación para impugnar la sanción.
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      Transcurrido ese plazo sin objeciones, la sanción quedará{" "}
+                      <strong>firme</strong> y tendrá valor de <strong>prueba plena</strong>{" "}
+                      en caso de litigio laboral.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </ScrollTracker>
 
-        {/* Verificación Criptográfica */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Hash className="h-5 w-5" />
-              Verificación de Autenticidad
-            </CardTitle>
-            <CardDescription>
-              Este documento está protegido criptográficamente
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div>
-              <p className="text-sm text-muted-foreground">ID de Notificación</p>
-              <p className="font-mono text-xs bg-slate-100 p-2 rounded">
-                {notificacion.id}
-              </p>
-            </div>
-            <div>
-              <p className="text-sm text-muted-foreground">Timestamp de Generación</p>
-              <p className="font-mono text-sm">{notificacion.timestamp_generacion}</p>
-            </div>
-            {notificacion.hash_sha256 && (
-              <div>
-                <p className="text-sm text-muted-foreground">Hash SHA-256</p>
-                <p className="font-mono text-xs bg-slate-100 p-2 rounded break-all">
-                  {notificacion.hash_sha256}
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Aviso Legal */}
-        <Card className="border-blue-200 bg-blue-50">
-          <CardContent className="pt-6">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-blue-600 mt-0.5" />
-              <div>
-                <h4 className="font-semibold text-blue-900 mb-2">
-                  Información Legal Importante
-                </h4>
-                <p className="text-sm text-blue-700 mb-2">
-                  De acuerdo con la Ley 27.742 de Modernización Laboral, usted tiene{" "}
-                  <strong>30 días corridos</strong> desde la confirmación de esta
-                  notificación para impugnar la sanción.
-                </p>
-                <p className="text-sm text-blue-700">
-                  Transcurrido ese plazo sin objeciones, la sanción quedará{" "}
-                  <strong>firme</strong> y tendrá valor de <strong>prueba plena</strong>{" "}
-                  en caso de litigio laboral.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Checkbox de confirmación de lectura */}
-        {!lecturaConfirmada && (
-          <CheckboxDeclaracionJurada
+        {/* Reconocimiento de lectura */}
+        {!yaConfirmado && (
+          <ReconocimientoLectura
             notificacionId={notificacion.id}
             token={notificacion.token}
-            onConfirmado={onLecturaConfirmada}
+            puedeEnviar={puedeConfirmar}
+            tipoSancion={notificacion.tipo}
+            diasSuspension={notificacion.dias_suspension}
+            fechaHecho={notificacion.fecha_hecho}
+            onConfirmado={handleConfirmado}
           />
         )}
 
