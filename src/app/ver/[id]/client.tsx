@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { GatekeeperValidacion } from "@/components/ver/gatekeeper-validacion";
+import { GatekeeperValidacionReforzada } from "@/components/ver/gatekeeper-validacion-reforzada";
 import { ContenidoNotificacion } from "@/components/ver/contenido-notificacion";
 import { TrackingApertura } from "@/components/ver/tracking-apertura";
 
@@ -31,6 +32,8 @@ interface EmpresaData {
 interface EmpleadoData {
   nombre: string;
   cuil: string;
+  telefono?: string;
+  convenioFirmado?: boolean;
 }
 
 interface VerNotificacionClientProps {
@@ -38,7 +41,9 @@ interface VerNotificacionClientProps {
   empresa: EmpresaData | null;
   empleado: EmpleadoData | null;
   identidadValidada: boolean;
+  otpValidado: boolean;
   lecturaConfirmada: boolean;
+  requiereSelfie: boolean;
 }
 
 export function VerNotificacionClient({
@@ -46,17 +51,19 @@ export function VerNotificacionClient({
   empresa,
   empleado,
   identidadValidada: initialIdentidadValidada,
+  otpValidado: initialOtpValidado,
   lecturaConfirmada: initialLecturaConfirmada,
+  requiereSelfie,
 }: VerNotificacionClientProps) {
   const [identidadValidada, setIdentidadValidada] = useState(initialIdentidadValidada);
   const [lecturaConfirmada, setLecturaConfirmada] = useState(initialLecturaConfirmada);
 
-  // Si la identidad ya estaba validada, mostrar directamente el contenido
+  // Si la identidad ya estaba validada (incluyendo OTP), mostrar directamente el contenido
   useEffect(() => {
-    if (initialIdentidadValidada) {
+    if (initialIdentidadValidada && initialOtpValidado) {
       setIdentidadValidada(true);
     }
-  }, [initialIdentidadValidada]);
+  }, [initialIdentidadValidada, initialOtpValidado]);
 
   const handleValidacionExitosa = () => {
     setIdentidadValidada(true);
@@ -66,6 +73,9 @@ export function VerNotificacionClient({
     setLecturaConfirmada(true);
   };
 
+  // Determinar si usar gatekeeper reforzado (empleado con convenio firmado)
+  const usarValidacionReforzada = empleado?.convenioFirmado === true;
+
   // Paso 1: Gatekeeper - Validación de identidad
   if (!identidadValidada) {
     return (
@@ -73,12 +83,23 @@ export function VerNotificacionClient({
         {/* Tracking básico de apertura de link */}
         <TrackingApertura token={notificacion.token} />
 
-        <GatekeeperValidacion
-          token={notificacion.token}
-          empresaNombre={empresa?.razon_social || "Su empleador"}
-          empleadoNombre={empleado?.nombre || "Trabajador"}
-          onValidacionExitosa={handleValidacionExitosa}
-        />
+        {usarValidacionReforzada ? (
+          <GatekeeperValidacionReforzada
+            token={notificacion.token}
+            empresaNombre={empresa?.razon_social || "Su empleador"}
+            empleadoNombre={empleado?.nombre || "Trabajador"}
+            empleadoTelefono={empleado?.telefono}
+            requiereSelfie={requiereSelfie}
+            onValidacionExitosa={handleValidacionExitosa}
+          />
+        ) : (
+          <GatekeeperValidacion
+            token={notificacion.token}
+            empresaNombre={empresa?.razon_social || "Su empleador"}
+            empleadoNombre={empleado?.nombre || "Trabajador"}
+            onValidacionExitosa={handleValidacionExitosa}
+          />
+        )}
       </>
     );
   }

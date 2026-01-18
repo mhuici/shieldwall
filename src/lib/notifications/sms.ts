@@ -104,7 +104,73 @@ export function formatearTelefonoArgentino(telefono: string): string {
 }
 
 // ============================================
-// FUNCIÓN PRINCIPAL DE ENVÍO
+// FUNCIÓN GENÉRICA DE ENVÍO SMS
+// ============================================
+
+/**
+ * Envía un SMS genérico a un número de teléfono
+ */
+export async function sendSMS(
+  telefono: string,
+  mensaje: string
+): Promise<ResultadoEnvioSMS> {
+  const client = getTwilioClient();
+
+  if (!client) {
+    return {
+      success: false,
+      error: "Servicio de SMS no configurado",
+    };
+  }
+
+  if (!TWILIO_PHONE_NUMBER) {
+    return {
+      success: false,
+      error: "Número de envío no configurado",
+    };
+  }
+
+  if (!telefono) {
+    return {
+      success: false,
+      error: "Número de teléfono no proporcionado",
+    };
+  }
+
+  try {
+    const telefonoFormateado = formatearTelefonoArgentino(telefono);
+
+    const message = await client.messages.create({
+      body: mensaje,
+      from: TWILIO_PHONE_NUMBER,
+      to: telefonoFormateado,
+    });
+
+    return {
+      success: true,
+      messageSid: message.sid,
+    };
+  } catch (error) {
+    console.error("Error enviando SMS:", error);
+
+    let errorCode: string | undefined;
+    let errorMessage = "Error desconocido";
+
+    if (error && typeof error === "object" && "code" in error) {
+      errorCode = String((error as { code: number }).code);
+      errorMessage = (error as { message?: string }).message || errorMessage;
+    }
+
+    return {
+      success: false,
+      error: errorMessage,
+      errorCode,
+    };
+  }
+}
+
+// ============================================
+// FUNCIÓN PRINCIPAL DE ENVÍO SANCIÓN
 // ============================================
 
 export async function enviarSMSSancion(datos: DatosSMSSancion): Promise<ResultadoEnvioSMS> {

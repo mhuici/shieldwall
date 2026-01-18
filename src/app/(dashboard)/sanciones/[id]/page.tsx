@@ -19,6 +19,8 @@ import {
   MessageSquare,
   Send,
   Package,
+  Shield,
+  Link2,
 } from "lucide-react";
 import Link from "next/link";
 import { formatearCUIL } from "@/lib/validators";
@@ -26,6 +28,7 @@ import { EnviarNotificacionButton } from "@/components/sanciones/enviar-notifica
 import { SemaforoBadge } from "@/components/notificaciones/semaforo-notificacion";
 import { SeccionDescargoEmpleador } from "@/components/descargo";
 import { TimelineUnificado } from "@/components/timeline";
+import { AccionesFirmaTiempo } from "@/components/sanciones/acciones-firma-tiempo";
 
 interface PageProps {
   params: Promise<{ id: string }>;
@@ -50,7 +53,7 @@ export default async function SancionDetailPage({ params }: PageProps) {
     .from("notificaciones")
     .select(`
       *,
-      empleado:empleados(id, nombre, cuil, email, telefono)
+      empleado:empleados(id, nombre, cuil, email, telefono, convenio_firmado)
     `)
     .eq("id", id)
     .eq("empresa_id", empresa.id)
@@ -66,6 +69,7 @@ export default async function SancionDetailPage({ params }: PageProps) {
     cuil: string;
     email: string | null;
     telefono: string | null;
+    convenio_firmado: boolean | null;
   } | null;
 
   const getEstadoBadge = (estado: string) => {
@@ -218,6 +222,44 @@ export default async function SancionDetailPage({ params }: PageProps) {
               <p className="text-sm text-muted-foreground">ID de Notificación</p>
               <p className="font-mono text-xs">{notificacion.id}</p>
             </div>
+
+            {/* Estado Firma Digital PKI */}
+            <div className="pt-2 border-t">
+              <div className="flex items-center gap-2 mb-1">
+                <Shield className={`h-4 w-4 ${notificacion.firma_digital_aplicada ? 'text-green-600' : 'text-gray-400'}`} />
+                <p className="text-sm font-medium">Firma Digital PKI</p>
+              </div>
+              {notificacion.firma_digital_aplicada ? (
+                <div className="text-xs bg-green-50 p-2 rounded text-green-700">
+                  <p>Firmado por: {notificacion.firma_digital_firmante}</p>
+                  <p>Algoritmo: {notificacion.firma_digital_algoritmo}</p>
+                  <p className="font-mono">Cert: {notificacion.firma_digital_certificado_serial}</p>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Pendiente de aplicar</p>
+              )}
+            </div>
+
+            {/* Estado Timestamp Blockchain */}
+            <div className="pt-2 border-t">
+              <div className="flex items-center gap-2 mb-1">
+                <Link2 className={`h-4 w-4 ${notificacion.ots_timestamp_at ? 'text-green-600' : 'text-gray-400'}`} />
+                <p className="text-sm font-medium">Timestamp Blockchain</p>
+              </div>
+              {notificacion.ots_timestamp_at ? (
+                <div className="text-xs bg-green-50 p-2 rounded text-green-700">
+                  <p>Anclado: {new Date(notificacion.ots_timestamp_at).toLocaleString('es-AR')}</p>
+                  {notificacion.ots_confirmado && (
+                    <p className="flex items-center gap-1">
+                      <CheckCircle className="h-3 w-3" />
+                      Confirmado en blockchain
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">Pendiente de anclar</p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
@@ -309,6 +351,16 @@ export default async function SancionDetailPage({ params }: PageProps) {
       {/* Timeline de Cadena de Custodia */}
       <TimelineUnificado notificacionId={notificacion.id} />
 
+      {/* Acciones de Firma Digital y Timestamp */}
+      {notificacion.hash_sha256 && (
+        <AccionesFirmaTiempo
+          notificacionId={notificacion.id}
+          tieneHash={!!notificacion.hash_sha256}
+          firmaAplicada={!!notificacion.firma_digital_aplicada}
+          timestampAplicado={!!notificacion.ots_timestamp_at}
+        />
+      )}
+
       {/* Enviar Notificación */}
       <Card>
         <CardHeader>
@@ -338,6 +390,7 @@ export default async function SancionDetailPage({ params }: PageProps) {
                   notificacionId={notificacion.id}
                   tieneEmail={!!empleado?.email}
                   tieneTelefono={!!empleado?.telefono}
+                  tieneConvenio={!!empleado?.convenio_firmado}
                 />
               )}
             </>

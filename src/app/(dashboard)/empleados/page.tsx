@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Users, Plus } from "lucide-react";
 import { AgregarEmpleadoDialog } from "@/components/empleados/agregar-empleado-dialog";
 import { formatearCUIL } from "@/lib/validators";
+import { TablaEmpleados } from "@/components/empleados/tabla-empleados";
 
 export default async function EmpleadosPage() {
   const supabase = await createClient();
@@ -13,13 +14,13 @@ export default async function EmpleadosPage() {
 
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("id")
+    .select("id, razon_social")
     .eq("user_id", user!.id)
     .single();
 
   const { data: empleados } = await supabase
     .from("empleados")
-    .select("*")
+    .select("*, convenio:convenios_domicilio(id, estado, firmado_at)")
     .eq("empresa_id", empresa!.id)
     .eq("activo", true)
     .order("nombre");
@@ -37,30 +38,11 @@ export default async function EmpleadosPage() {
       </div>
 
       {empleados && empleados.length > 0 ? (
-        <Card>
-          <CardContent className="p-0">
-            <table className="w-full">
-              <thead className="border-b bg-slate-50">
-                <tr>
-                  <th className="text-left p-4 font-medium">Nombre</th>
-                  <th className="text-left p-4 font-medium">CUIL</th>
-                  <th className="text-left p-4 font-medium hidden sm:table-cell">Email</th>
-                  <th className="text-left p-4 font-medium hidden md:table-cell">Teléfono</th>
-                </tr>
-              </thead>
-              <tbody>
-                {empleados.map((empleado) => (
-                  <tr key={empleado.id} className="border-b last:border-0">
-                    <td className="p-4 font-medium">{empleado.nombre}</td>
-                    <td className="p-4 font-mono text-sm">{formatearCUIL(empleado.cuil)}</td>
-                    <td className="p-4 hidden sm:table-cell text-muted-foreground">{empleado.email || "-"}</td>
-                    <td className="p-4 hidden md:table-cell text-muted-foreground">{empleado.telefono || "-"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </CardContent>
-        </Card>
+        <TablaEmpleados
+          empleados={empleados}
+          empresaId={empresa!.id}
+          empresaNombre={empresa!.razon_social}
+        />
       ) : (
         <Card>
           <CardContent className="py-12">

@@ -19,7 +19,7 @@ export default async function VerSancionPage({ params }: PageProps) {
     .from("notificaciones")
     .select(`
       *,
-      empleado:empleados(id, nombre, cuil, legajo),
+      empleado:empleados(id, nombre, cuil, legajo, telefono, convenio_firmado, convenio_id),
       empresa:empresas(id, razon_social, cuit, user_id)
     `)
     .eq("token_acceso", id)
@@ -33,7 +33,7 @@ export default async function VerSancionPage({ params }: PageProps) {
       .from("notificaciones")
       .select(`
         *,
-        empleado:empleados(id, nombre, cuil, legajo),
+        empleado:empleados(id, nombre, cuil, legajo, telefono, convenio_firmado, convenio_id),
         empresa:empresas(id, razon_social, cuit, user_id)
       `)
       .eq("id", id)
@@ -51,6 +51,9 @@ export default async function VerSancionPage({ params }: PageProps) {
     nombre: string;
     cuil: string;
     legajo?: string;
+    telefono?: string;
+    convenio_firmado?: boolean;
+    convenio_id?: string;
   } | null;
 
   const empresa = notificacion.empresa as {
@@ -59,6 +62,23 @@ export default async function VerSancionPage({ params }: PageProps) {
     cuit: string;
     user_id: string;
   } | null;
+
+  // Obtener datos del convenio si existe
+  let requiereSelfie = false;
+  if (empleado?.convenio_id) {
+    const { data: convenio } = await supabase
+      .from("convenios_domicilio")
+      .select("acepta_biometricos")
+      .eq("id", empleado.convenio_id)
+      .single();
+
+    if (convenio) {
+      requiereSelfie = convenio.acepta_biometricos === true;
+    }
+  }
+
+  // Determinar si OTP ya fue validado
+  const otpValidado = notificacion.otp_validado === true;
 
   // Token para tracking y APIs
   const trackingToken = notificacion.token_acceso || notificacion.id;
@@ -101,6 +121,8 @@ export default async function VerSancionPage({ params }: PageProps) {
   const datosEmpleado = empleado ? {
     nombre: empleado.nombre,
     cuil: empleado.cuil,
+    telefono: empleado.telefono,
+    convenioFirmado: empleado.convenio_firmado,
   } : null;
 
   return (
@@ -109,7 +131,9 @@ export default async function VerSancionPage({ params }: PageProps) {
       empresa={datosEmpresa}
       empleado={datosEmpleado}
       identidadValidada={identidadValidada}
+      otpValidado={otpValidado}
       lecturaConfirmada={lecturaConfirmada}
+      requiereSelfie={requiereSelfie}
     />
   );
 }

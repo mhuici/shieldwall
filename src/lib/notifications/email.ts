@@ -529,3 +529,188 @@ export async function enviarEmailAlertaEmpleador(datos: DatosEmailAlerta): Promi
     return { success: false, error: error instanceof Error ? error.message : "Error desconocido" };
   }
 }
+
+// ============================================
+// EMAIL DE INVITACIÓN A FIRMAR CONVENIO
+// ============================================
+
+export interface DatosEmailConvenio {
+  to: string;
+  empleadoNombre: string;
+  empresaNombre: string;
+  linkFirma: string;
+  diasParaExpirar: number;
+}
+
+export async function sendConvenioInvitacionEmail(
+  datos: DatosEmailConvenio
+): Promise<ResultadoEnvioEmail> {
+  if (!SENDGRID_API_KEY) {
+    return { success: false, error: "Servicio de email no configurado" };
+  }
+
+  const htmlContent = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; background-color: #f5f5f5;">
+  <table role="presentation" style="width: 100%; border-collapse: collapse;">
+    <tr>
+      <td style="padding: 40px 20px;">
+        <table role="presentation" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+
+          <!-- Header -->
+          <tr>
+            <td style="background-color: #1e40af; padding: 30px 40px; text-align: center;">
+              <h1 style="margin: 0; color: #ffffff; font-size: 24px; font-weight: 600;">
+                📋 NotiLegal
+              </h1>
+              <p style="margin: 10px 0 0 0; color: #93c5fd; font-size: 14px;">
+                Convenio de Domicilio Electrónico
+              </p>
+            </td>
+          </tr>
+
+          <!-- Info -->
+          <tr>
+            <td style="background-color: #dbeafe; padding: 20px 40px; border-bottom: 1px solid #93c5fd;">
+              <p style="margin: 0; color: #1e40af; font-size: 14px; font-weight: 500;">
+                📝 <strong>DOCUMENTO LEGAL</strong> - Requiere su firma
+              </p>
+            </td>
+          </tr>
+
+          <!-- Contenido -->
+          <tr>
+            <td style="padding: 40px;">
+              <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                Estimado/a <strong>${datos.empleadoNombre}</strong>,
+              </p>
+
+              <p style="margin: 0 0 20px 0; color: #374151; font-size: 16px; line-height: 1.6;">
+                <strong>${datos.empresaNombre}</strong> le invita a firmar el <strong>Convenio de Constitución de Domicilio Electrónico</strong>.
+              </p>
+
+              <p style="margin: 0 0 20px 0; color: #374151; font-size: 15px; line-height: 1.6;">
+                Este convenio le permitirá recibir notificaciones laborales de forma digital, segura y privada, evitando demoras de la correspondencia tradicional.
+              </p>
+
+              <!-- Beneficios -->
+              <table style="width: 100%; background-color: #f0fdf4; border: 1px solid #86efac; border-radius: 8px; margin: 25px 0;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0 0 12px 0; color: #166534; font-size: 14px; font-weight: 600;">
+                      Beneficios para usted:
+                    </p>
+                    <ul style="margin: 0; padding-left: 20px; color: #166534; font-size: 14px; line-height: 1.8;">
+                      <li>Reciba notificaciones al instante en su email y teléfono</li>
+                      <li>Acceso seguro con verificación de identidad</li>
+                      <li>Siempre puede solicitar notificación física si lo prefiere</li>
+                      <li>Sin costo alguno para usted</li>
+                    </ul>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA Button -->
+              <table role="presentation" style="width: 100%; margin: 30px 0;">
+                <tr>
+                  <td style="text-align: center;">
+                    <a href="${datos.linkFirma}"
+                       style="display: inline-block; background-color: #1e40af; color: #ffffff; text-decoration: none; padding: 16px 40px; border-radius: 8px; font-size: 16px; font-weight: 600;">
+                      Revisar y Firmar Convenio
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Plazo -->
+              <table style="width: 100%; background-color: #fef3c7; border: 1px solid #fcd34d; border-radius: 8px; margin: 25px 0;">
+                <tr>
+                  <td style="padding: 20px;">
+                    <p style="margin: 0; color: #92400e; font-size: 14px;">
+                      ⏰ <strong>Este enlace expira en ${datos.diasParaExpirar} días.</strong>
+                      Si no puede firmarlo ahora, solicite un nuevo enlace a su empleador.
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Alternativa física -->
+              <p style="margin: 25px 0 0 0; color: #6b7280; font-size: 13px; line-height: 1.6;">
+                <strong>Nota:</strong> Si prefiere no recibir notificaciones electrónicas, puede solicitar a su empleador que todas las comunicaciones se realicen por carta documento. Esta opción no implica ningún perjuicio para usted.
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="background-color: #f9fafb; padding: 25px 40px; border-top: 1px solid #e5e7eb;">
+              <p style="margin: 0 0 10px 0; color: #6b7280; font-size: 12px; text-align: center;">
+                Este mensaje fue enviado por NotiLegal en nombre de ${datos.empresaNombre}
+              </p>
+              <p style="margin: 0; color: #9ca3af; font-size: 11px; text-align: center;">
+                Conforme a la Acordada N° 31/2011 CSJN
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+  `;
+
+  const textoPlano = `
+CONVENIO DE DOMICILIO ELECTRÓNICO
+==================================
+
+Estimado/a ${datos.empleadoNombre},
+
+${datos.empresaNombre} le invita a firmar el Convenio de Constitución de Domicilio Electrónico.
+
+Este convenio le permitirá recibir notificaciones laborales de forma digital, segura y privada.
+
+Para revisar y firmar el convenio, ingrese al siguiente enlace:
+${datos.linkFirma}
+
+IMPORTANTE: Este enlace expira en ${datos.diasParaExpirar} días.
+
+Si prefiere no recibir notificaciones electrónicas, puede solicitar a su empleador que todas las comunicaciones se realicen por carta documento.
+
+---
+NotiLegal - Sistema de Notificaciones Laborales
+Conforme a la Acordada N° 31/2011 CSJN
+  `.trim();
+
+  try {
+    const msg = {
+      to: datos.to,
+      from: {
+        email: SENDGRID_FROM_EMAIL,
+        name: SENDGRID_FROM_NAME,
+      },
+      subject: `📝 ${datos.empresaNombre} - Convenio de Domicilio Electrónico`,
+      text: textoPlano,
+      html: htmlContent,
+    };
+
+    const [response] = await sgMail.send(msg);
+
+    return {
+      success: true,
+      messageId: response.headers["x-message-id"] as string,
+    };
+  } catch (error) {
+    console.error("Error enviando email de convenio:", error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Error desconocido",
+    };
+  }
+}

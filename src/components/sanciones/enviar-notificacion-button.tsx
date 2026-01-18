@@ -4,18 +4,21 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2, Mail, MessageSquare, Send } from "lucide-react";
+import { Loader2, Mail, MessageSquare, Send, AlertTriangle, FileSignature } from "lucide-react";
+import Link from "next/link";
 
 interface EnviarNotificacionButtonProps {
   notificacionId: string;
   tieneEmail: boolean;
   tieneTelefono: boolean;
+  tieneConvenio?: boolean;
 }
 
 export function EnviarNotificacionButton({
   notificacionId,
   tieneEmail,
   tieneTelefono,
+  tieneConvenio = false,
 }: EnviarNotificacionButtonProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -24,6 +27,37 @@ export function EnviarNotificacionButton({
     success: boolean;
     message: string;
   } | null>(null);
+
+  // Si no tiene convenio firmado, mostrar advertencia
+  if (!tieneConvenio) {
+    return (
+      <div className="space-y-4">
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+          <AlertTriangle className="h-5 w-5 text-amber-600 mt-0.5 flex-shrink-0" />
+          <div>
+            <h4 className="font-medium text-amber-900 mb-1">
+              Convenio de Domicilio Electrónico requerido
+            </h4>
+            <p className="text-sm text-amber-700 mb-3">
+              Para enviar notificaciones electrónicas con validez legal, el empleado debe
+              firmar primero el Convenio de Domicilio Electrónico conforme a la Acordada
+              N° 31/2011 CSJN.
+            </p>
+            <Link href="/empleados">
+              <Button variant="outline" size="sm" className="gap-2">
+                <FileSignature className="h-4 w-4" />
+                Ir a gestionar convenios
+              </Button>
+            </Link>
+          </div>
+        </div>
+        <p className="text-xs text-muted-foreground text-center">
+          Alternativa: Puede enviar notificación por carta documento desde la opción
+          correspondiente.
+        </p>
+      </div>
+    );
+  }
 
   const handleEnviar = async () => {
     setLoading(true);

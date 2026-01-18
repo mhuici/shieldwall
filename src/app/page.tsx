@@ -14,7 +14,6 @@ import {
   Lock,
   XCircle,
   DollarSign,
-  TrendingDown,
   Building2,
   Users,
   BadgeCheck,
@@ -24,11 +23,18 @@ import {
   UserCheck,
   Camera,
   ClipboardList,
-  MessageCircle,
   ChevronDown,
   FileText,
   Gavel,
-  ExternalLink,
+  FileSignature,
+  Fingerprint,
+  ShieldCheck,
+  BookOpen,
+  Hash,
+  Globe,
+  CircleCheck,
+  CircleX,
+  Minus,
 } from "lucide-react";
 import {
   Collapsible,
@@ -46,93 +52,206 @@ export default function LandingPage() {
             <Shield className="h-8 w-8 text-emerald-600" />
             <span className="text-xl font-bold text-slate-900">Notificarte</span>
           </div>
-          <div className="flex items-center gap-4">
-            <a href="#precio" className="text-slate-600 hover:text-slate-900 hidden sm:block">
-              Precios
-            </a>
-            <a href="#como-funciona" className="text-slate-600 hover:text-slate-900 hidden sm:block">
+          <nav className="hidden md:flex items-center gap-6">
+            <a href="#como-funciona" className="text-slate-600 hover:text-slate-900 text-sm">
               Como Funciona
             </a>
-            <Link href="/login">
-              <Button>Empezar Ahora</Button>
-            </Link>
-          </div>
+            <a href="#validacion-legal" className="text-slate-600 hover:text-slate-900 text-sm">
+              Validacion Legal
+            </a>
+            <a href="#precio" className="text-slate-600 hover:text-slate-900 text-sm">
+              Precios
+            </a>
+            <a href="#faq" className="text-slate-600 hover:text-slate-900 text-sm">
+              FAQ
+            </a>
+          </nav>
+          <Link href="/login">
+            <Button className="bg-emerald-600 hover:bg-emerald-700">
+              Empezar Gratis
+            </Button>
+          </Link>
         </div>
       </header>
 
-      {/* Hero - Hook emocional fuerte */}
-      <section className="py-16 lg:py-24 bg-gradient-to-b from-red-50 via-white to-white">
+      {/* Hero - Validado legalmente */}
+      <section className="py-20 lg:py-28 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 text-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-100 text-red-700 rounded-full text-sm font-medium mb-6">
+            <div className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/20 text-red-300 rounded-full text-sm font-medium mb-8 border border-red-500/30">
               <AlertTriangle className="h-4 w-4" />
-              El 73% de las PyMEs pierde juicios laborales por falta de documentacion
+              El 73% de las PyMEs pierde juicios laborales por falta de prueba
             </div>
-            <h1 className="text-4xl lg:text-5xl font-bold text-slate-900 mb-6 leading-tight">
-              Cada sancion sin prueba fehaciente <br />
-              <span className="text-red-600">te puede costar $72 millones</span>
+
+            <h1 className="text-4xl lg:text-6xl font-bold mb-6 leading-tight">
+              El escudo legal que tu PyME
+              <span className="text-emerald-400"> necesita</span>
             </h1>
-            <p className="text-xl text-slate-600 mb-4 max-w-3xl mx-auto">
-              Un empleado que despedis con causa puede decir &quot;nunca me notificaron las sanciones&quot;.
-              Sin prueba de entrega, el juez le cree. Tu despido con causa se convierte en
-              <strong> despido sin causa</strong>. Y pagas todo.
+
+            <p className="text-xl text-slate-300 mb-8 max-w-3xl mx-auto leading-relaxed">
+              Notificarte construye <strong className="text-white">expedientes probatorios blindados</strong> para
+              tus sanciones laborales. Validado por abogados. Respaldado por la ley.
             </p>
-            <div className="bg-slate-100 rounded-lg p-4 max-w-2xl mx-auto mb-8">
-              <p className="text-slate-700">
-                <strong>Indemnizacion promedio por despido sin causa:</strong> $72.000.000 ARS
-                <br />
-                <span className="text-sm text-slate-500">(6 meses de salario + multas Ley 25.323 + intereses)</span>
-              </p>
+
+            <div className="grid md:grid-cols-3 gap-4 max-w-3xl mx-auto mb-10">
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold text-emerald-400">$72M</div>
+                <div className="text-sm text-slate-400">Costo promedio de perder un juicio</div>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold text-emerald-400">30 días</div>
+                <div className="text-sm text-slate-400">Plazo Ley 27.742 para impugnar</div>
+              </div>
+              <div className="bg-white/5 border border-white/10 rounded-lg p-4">
+                <div className="text-3xl font-bold text-emerald-400">6.716%</div>
+                <div className="text-sm text-slate-400">ROI de 1 juicio evitado</div>
+              </div>
             </div>
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link href="/login">
-                <Button size="lg" className="text-lg px-8 bg-emerald-600 hover:bg-emerald-700">
-                  Proteger Mi Empresa
+                <Button size="lg" className="text-lg px-8 bg-emerald-500 hover:bg-emerald-600 text-white">
+                  Crear Cuenta Gratis
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
               <a href="#como-funciona">
-                <Button size="lg" variant="outline" className="text-lg px-8">
+                <Button size="lg" variant="outline" className="text-lg px-8 border-white/30 text-white hover:bg-white/10">
                   Ver Como Funciona
                 </Button>
               </a>
             </div>
+
+            <p className="text-sm text-slate-500 mt-6">
+              Sin tarjeta de credito · Primeras 3 sanciones gratis
+            </p>
           </div>
         </div>
       </section>
 
-      {/* Que es - Explicacion clara */}
-      <section className="py-16 bg-emerald-600 text-white">
+      {/* El Problema Real */}
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-3xl font-bold mb-4">
-                Que es Notificarte?
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                El problema que nadie te cuenta
               </h2>
-              <p className="text-xl text-emerald-100">
-                Un sistema digital que convierte tus sanciones laborales en prueba irrefutable para juicios.
+              <p className="text-lg text-slate-600">
+                No alcanza con notificar. Tenes que <strong>probar</strong> que notificaste.
               </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-6">
-              <div className="bg-white/10 rounded-lg p-6 text-center">
-                <Mail className="h-12 w-12 mx-auto mb-4 text-emerald-200" />
-                <h3 className="font-semibold text-lg mb-2">Notificacion Digital</h3>
-                <p className="text-emerald-100 text-sm">
-                  Envias apercibimientos y suspensiones por email + WhatsApp. Instantaneo.
+
+            <div className="bg-red-50 border border-red-200 rounded-xl p-8 mb-8">
+              <div className="flex items-start gap-4">
+                <div className="bg-red-100 p-3 rounded-lg">
+                  <AlertTriangle className="h-6 w-6 text-red-600" />
+                </div>
+                <div>
+                  <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                    El escenario que destruye PyMEs
+                  </h3>
+                  <p className="text-slate-700 mb-4">
+                    Despedis a un empleado con causa despues de 3 sanciones. En el juicio, el empleado dice:
+                  </p>
+                  <blockquote className="border-l-4 border-red-400 pl-4 italic text-slate-600 mb-4">
+                    &ldquo;Nunca me notificaron nada. No firme ningun apercibimiento.
+                    No sabia que tenia sanciones.&rdquo;
+                  </blockquote>
+                  <p className="text-slate-700">
+                    <strong>Sin prueba fehaciente de notificacion:</strong> El juez le cree.
+                    Tu despido con causa se convierte en despido sin causa.
+                    Pagas indemnizacion completa + multas + intereses.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CircleX className="h-6 w-6 text-red-500" />
+                  <h4 className="font-semibold text-slate-900">Firma en el legajo</h4>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>&ldquo;Me obligaron a firmar bajo coaccion&rdquo;</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>&ldquo;Esa no es mi firma&rdquo;</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>No prueba que el hecho ocurrio</span>
+                  </li>
+                </ul>
+              </div>
+              <div className="bg-slate-50 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <CircleX className="h-6 w-6 text-red-500" />
+                  <h4 className="font-semibold text-slate-900">Carta documento</h4>
+                </div>
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>$15.000+ por cada una</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>Demora 3-5 dias habiles</span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <XCircle className="h-4 w-4 text-red-400 mt-0.5 shrink-0" />
+                    <span>Tampoco prueba el hecho, solo el envio</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* La Solucion: Notificarte */}
+      <section className="py-16 bg-emerald-600 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+              Notificarte no es solo notificar
+            </h2>
+            <p className="text-xl text-emerald-100 mb-12 max-w-2xl mx-auto">
+              Es construir un <strong className="text-white">expediente probatorio completo</strong> que
+              demuestra el hecho, la notificacion, la identidad y el derecho de defensa.
+            </p>
+
+            <div className="grid md:grid-cols-4 gap-6">
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <FileSignature className="h-10 w-10 mx-auto mb-4 text-emerald-200" />
+                <h3 className="font-semibold mb-2">Convenio Previo</h3>
+                <p className="text-sm text-emerald-100">
+                  Ancla juridica que valida todo lo digital
                 </p>
               </div>
-              <div className="bg-white/10 rounded-lg p-6 text-center">
-                <BadgeCheck className="h-12 w-12 mx-auto mb-4 text-emerald-200" />
-                <h3 className="font-semibold text-lg mb-2">Confirmacion Fehaciente</h3>
-                <p className="text-emerald-100 text-sm">
-                  El empleado valida su identidad con CUIL y firma una declaracion jurada digital.
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <Fingerprint className="h-10 w-10 mx-auto mb-4 text-emerald-200" />
+                <h3 className="font-semibold mb-2">Identidad Verificada</h3>
+                <p className="text-sm text-emerald-100">
+                  CUIL + OTP + Selfie = imposible negar
                 </p>
               </div>
-              <div className="bg-white/10 rounded-lg p-6 text-center">
-                <Shield className="h-12 w-12 mx-auto mb-4 text-emerald-200" />
-                <h3 className="font-semibold text-lg mb-2">Prueba para Juicios</h3>
-                <p className="text-emerald-100 text-sm">
-                  Descargas un paquete de evidencia con cadena de custodia completa.
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <Hash className="h-10 w-10 mx-auto mb-4 text-emerald-200" />
+                <h3 className="font-semibold mb-2">Inmutable</h3>
+                <p className="text-sm text-emerald-100">
+                  Hash SHA-256 + Blockchain = no se puede alterar
+                </p>
+              </div>
+              <div className="bg-white/10 backdrop-blur rounded-xl p-6 border border-white/20">
+                <Scale className="h-10 w-10 mx-auto mb-4 text-emerald-200" />
+                <h3 className="font-semibold mb-2">Validado Legalmente</h3>
+                <p className="text-sm text-emerald-100">
+                  Acordadas CSJN + Art. 288 CCyC
                 </p>
               </div>
             </div>
@@ -140,265 +259,470 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Por que gana juicios - NUEVO */}
+      {/* FASE 0: El Ancla Juridica */}
+      <section className="py-16 bg-slate-50" id="como-funciona">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-amber-100 text-amber-700 rounded-full text-sm font-medium mb-4">
+                <Zap className="h-4 w-4" />
+                El secreto que otros sistemas no tienen
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Fase 0: El Convenio de Domicilio Electronico
+              </h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Antes de notificar, el empleado firma un convenio donde acepta recibir
+                notificaciones digitales. Este documento es el <strong>&ldquo;ancla juridica&rdquo;</strong> que
+                da validez a todo lo demas.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-emerald-100 p-2 rounded-lg">
+                      <FileSignature className="h-5 w-5 text-emerald-600" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900">Convenio de Domicilio Electronico</h3>
+                  </div>
+                  <div className="space-y-3 text-sm text-slate-600">
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>Empleado constituye email y telefono como domicilios legales</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>Acepta recibir notificaciones laborales por esos medios</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>Incluye consentimiento Ley 25.326 (datos personales)</span>
+                    </div>
+                    <div className="flex items-start gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500 mt-0.5 shrink-0" />
+                      <span>Firma en papel o digital con verificacion de identidad</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+                  <div className="flex items-start gap-3">
+                    <BookOpen className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-amber-800">Fundamento legal</p>
+                      <p className="text-sm text-amber-700">
+                        Acordada N° 31/2011 CSJN: &ldquo;La constitucion de domicilio electronico
+                        y registro previo son requisitos para que la notificacion produzca efectos.&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
+                <h4 className="font-semibold text-slate-900 mb-4">Por que es obligatorio</h4>
+                <div className="space-y-4">
+                  <div className="flex items-start gap-3">
+                    <div className="bg-red-100 p-1.5 rounded">
+                      <XCircle className="h-4 w-4 text-red-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900">Sin convenio</p>
+                      <p className="text-sm text-slate-600">
+                        &ldquo;Nunca acepte recibir notificaciones por WhatsApp&rdquo;
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3">
+                    <div className="bg-emerald-100 p-1.5 rounded">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900">Con convenio</p>
+                      <p className="text-sm text-slate-600">
+                        Documento firmado donde el empleado constituyo ese WhatsApp como domicilio legal
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-slate-100">
+                  <p className="text-sm text-slate-500 italic">
+                    &ldquo;El convenio es el ancla fisica/legal que da validez a todo lo digital posterior.
+                    Sin este documento, cualquier defensa electronica es mas debil.&rdquo;
+                  </p>
+                  <p className="text-sm text-slate-400 mt-2">— Evaluacion legal del sistema</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Validacion de Identidad */}
       <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <div className="max-w-5xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                Por que Notificarte gana juicios?
+                Identidad verificada en 3 pasos
               </h2>
               <p className="text-lg text-slate-600 max-w-2xl mx-auto">
-                No es solo notificar. Es construir un expediente probatorio completo que destruye
-                los argumentos tipicos del abogado del empleado.
+                Cuando el empleado abre la notificacion, verificamos que sea el
+                y no otra persona. Imposible de negar en juicio.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              <div className="relative">
+                <div className="absolute -top-3 -left-3 bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">1</div>
+                <Card className="h-full pt-6">
+                  <CardContent className="p-6">
+                    <div className="bg-slate-100 p-3 rounded-lg w-fit mb-4">
+                      <UserCheck className="h-6 w-6 text-slate-700" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 mb-2">Ingresa su CUIL</h3>
+                    <p className="text-sm text-slate-600">
+                      El empleado debe ingresar su CUIL completo. Si no coincide con el
+                      registrado, no puede acceder.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="relative">
+                <div className="absolute -top-3 -left-3 bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">2</div>
+                <Card className="h-full pt-6">
+                  <CardContent className="p-6">
+                    <div className="bg-slate-100 p-3 rounded-lg w-fit mb-4">
+                      <Smartphone className="h-6 w-6 text-slate-700" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 mb-2">Recibe codigo OTP</h3>
+                    <p className="text-sm text-slate-600">
+                      Enviamos un codigo de 6 digitos al telefono que el empleado
+                      constituyo en el convenio. Debe ingresarlo para continuar.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+
+              <div className="relative">
+                <div className="absolute -top-3 -left-3 bg-emerald-600 text-white w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm">3</div>
+                <Card className="h-full pt-6">
+                  <CardContent className="p-6">
+                    <div className="bg-slate-100 p-3 rounded-lg w-fit mb-4">
+                      <Camera className="h-6 w-6 text-slate-700" />
+                    </div>
+                    <h3 className="font-semibold text-slate-900 mb-2">Toma una selfie</h3>
+                    <p className="text-sm text-slate-600">
+                      El empleado se toma una foto con la pantalla visible.
+                      Guardamos la selfie con hash, IP y timestamp.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </div>
+
+            <div className="mt-8 bg-emerald-50 border border-emerald-200 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-emerald-100 p-2 rounded-lg shrink-0">
+                  <ShieldCheck className="h-6 w-6 text-emerald-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-900 mb-1">
+                    &ldquo;Si el sistema guarda la foto del empleado leyendo la sancion...&rdquo;
+                  </h4>
+                  <p className="text-slate-700">
+                    ...la carga de la prueba de que &lsquo;no fue el&rsquo; se vuelve casi imposible de remontar
+                    para el trabajador en juicio.
+                  </p>
+                  <p className="text-sm text-slate-500 mt-2">— Evaluacion de abogado laboralista</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Los 5 Pilares de Evidencia */}
+      <section className="py-16 bg-slate-900 text-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                5 capas de evidencia para blindar tu caso
+              </h2>
+              <p className="text-lg text-slate-400 max-w-2xl mx-auto">
+                No es solo la notificacion. Es un expediente probatorio completo
+                que ataca cada posible argumento de la defensa del empleado.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/20 p-2 rounded-lg">
+                    <Users className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Testigos Digitales</h3>
+                </div>
+                <p className="text-sm text-slate-400 mb-4">
+                  Declaraciones firmadas digitalmente con hash SHA-256, IP y timestamp.
+                </p>
+                <div className="text-xs text-slate-500 bg-white/5 rounded p-2">
+                  <strong className="text-slate-400">Ataca:</strong> &ldquo;No hay testigos del hecho&rdquo;
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/20 p-2 rounded-lg">
+                    <Camera className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Evidencia Multimedia</h3>
+                </div>
+                <p className="text-sm text-slate-400 mb-4">
+                  Fotos y videos con metadatos EXIF: GPS, fecha, dispositivo, hash.
+                </p>
+                <div className="text-xs text-slate-500 bg-white/5 rounded p-2">
+                  <strong className="text-slate-400">Ataca:</strong> &ldquo;No hay prueba del hecho&rdquo;
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/20 p-2 rounded-lg">
+                    <ClipboardList className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Bitacora de Novedades</h3>
+                </div>
+                <p className="text-sm text-slate-400 mb-4">
+                  Registro de 6 meses de gestion progresiva: llamados de atencion, charlas, advertencias.
+                </p>
+                <div className="text-xs text-slate-500 bg-white/5 rounded p-2">
+                  <strong className="text-slate-400">Ataca:</strong> &ldquo;Es persecucion/mobbing&rdquo;
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/20 p-2 rounded-lg">
+                    <MessageSquare className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Audiencia de Descargo</h3>
+                </div>
+                <p className="text-sm text-slate-400 mb-4">
+                  Empleado puede presentar su version. Si ejerce: posibles confesiones. Si no: renuncia documentada.
+                </p>
+                <div className="text-xs text-slate-500 bg-white/5 rounded p-2">
+                  <strong className="text-slate-400">Ataca:</strong> &ldquo;No tuve derecho de defensa&rdquo;
+                </div>
+              </div>
+
+              <div className="bg-white/5 border border-white/10 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/20 p-2 rounded-lg">
+                    <Download className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Pack de Evidencias</h3>
+                </div>
+                <p className="text-sm text-slate-400 mb-4">
+                  ZIP completo con todo: convenio, sancion, logs, selfie, cadena de custodia JSON para peritos.
+                </p>
+                <div className="text-xs text-slate-500 bg-white/5 rounded p-2">
+                  <strong className="text-slate-400">Listo para:</strong> Presentar en juicio
+                </div>
+              </div>
+
+              <div className="bg-emerald-600/20 border border-emerald-500/30 rounded-xl p-6">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="bg-emerald-500/30 p-2 rounded-lg">
+                    <Globe className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <h3 className="font-semibold">Blockchain Timestamp</h3>
+                </div>
+                <p className="text-sm text-slate-300 mb-4">
+                  Hash anclado en blockchain Bitcoin via OpenTimestamp. Fecha cierta irrefutable.
+                </p>
+                <div className="text-xs text-emerald-400/70 bg-emerald-500/10 rounded p-2">
+                  <strong>Verificable:</strong> Por cualquier perito, para siempre
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Flujo Simplificado */}
+      <section className="py-16 bg-white">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Como funciona en 4 pasos
+              </h2>
+            </div>
+
+            <div className="grid md:grid-cols-4 gap-4">
+              <div className="text-center">
+                <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileSignature className="h-7 w-7 text-emerald-600" />
+                </div>
+                <div className="text-sm font-medium text-emerald-600 mb-1">Paso 0</div>
+                <h3 className="font-semibold text-slate-900 mb-2">Onboarding</h3>
+                <p className="text-sm text-slate-600">
+                  Empleado firma convenio de domicilio electronico
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="h-7 w-7 text-emerald-600" />
+                </div>
+                <div className="text-sm font-medium text-emerald-600 mb-1">Paso 1</div>
+                <h3 className="font-semibold text-slate-900 mb-2">Creas la sancion</h3>
+                <p className="text-sm text-slate-600">
+                  Completas formulario, agregas testigos y evidencia
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="h-7 w-7 text-emerald-600" />
+                </div>
+                <div className="text-sm font-medium text-emerald-600 mb-1">Paso 2</div>
+                <h3 className="font-semibold text-slate-900 mb-2">Notificas</h3>
+                <p className="text-sm text-slate-600">
+                  Email + SMS + WhatsApp automatico al empleado
+                </p>
+              </div>
+
+              <div className="text-center">
+                <div className="bg-emerald-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <BadgeCheck className="h-7 w-7 text-emerald-600" />
+                </div>
+                <div className="text-sm font-medium text-emerald-600 mb-1">Paso 3</div>
+                <h3 className="font-semibold text-slate-900 mb-2">Queda firme</h3>
+                <p className="text-sm text-slate-600">
+                  30 dias sin impugnar = sancion firme (Ley 27.742)
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-10 bg-amber-50 border border-amber-200 rounded-xl p-6">
+              <div className="flex items-start gap-4">
+                <div className="bg-amber-100 p-2 rounded-lg shrink-0">
+                  <AlertTriangle className="h-5 w-5 text-amber-600" />
+                </div>
+                <div>
+                  <h4 className="font-semibold text-slate-900 mb-1">
+                    Si el empleado no confirma en 48 horas
+                  </h4>
+                  <p className="text-slate-700 text-sm">
+                    El sistema te alerta y genera una <strong>Cedula de Aviso</strong> que podes
+                    imprimir y hacer firmar en persona. El plazo de 30 dias corre desde esa firma.
+                    Siempre tenes un fallback fisico.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Validacion Legal */}
+      <section className="py-16 bg-slate-50" id="validacion-legal">
+        <div className="container mx-auto px-4">
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <div className="inline-flex items-center gap-2 px-3 py-1 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
+                <Gavel className="h-4 w-4" />
+                Validado por abogados laboralistas
+              </div>
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Fundamento legal solido
+              </h2>
+              <p className="text-lg text-slate-600 max-w-2xl mx-auto">
+                Cada elemento del sistema esta respaldado por normativa vigente.
               </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Testigos Digitales */}
-              <div className="bg-gradient-to-br from-emerald-50 to-white border-2 border-emerald-100 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-emerald-100 rounded-lg flex-shrink-0">
-                    <UserCheck className="h-6 w-6 text-emerald-600" />
+              <div className="bg-white rounded-xl border border-slate-200 p-6">
+                <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <Scale className="h-5 w-5 text-emerald-600" />
+                  Normativa aplicable
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-900">Acordada 31/2011 CSJN</p>
+                      <p className="text-sm text-slate-600">Domicilio electronico y notificaciones</p>
+                    </div>
                   </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 mb-2">Testigos Digitales</h3>
-                    <p className="text-slate-600 text-sm mb-3">
-                      Los testigos declaran EN EL MOMENTO del hecho, no meses despues en juicio
-                      cuando &quot;no recuerdan&quot;.
-                    </p>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-xs text-slate-500 mb-1">Valor probatorio:</p>
-                      <ul className="text-xs text-slate-700 space-y-1">
-                        <li>• Declaracion firmada con hash SHA-256</li>
-                        <li>• Timestamp exacto (horas del hecho, no meses)</li>
-                        <li>• IP de origen (prueba que no fue coaccion)</li>
-                        <li>• Declaracion jurada bajo Art. 275 CP</li>
-                      </ul>
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-900">Art. 288 Codigo Civil y Comercial</p>
+                      <p className="text-sm text-slate-600">Equivalencia de firma digital</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-900">Ley 27.742 (Reforma Laboral 2025)</p>
+                      <p className="text-sm text-slate-600">Plazo de 30 dias para impugnar</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-900">Art. 67 LCT</p>
+                      <p className="text-sm text-slate-600">Poder disciplinario del empleador</p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-3 p-3 bg-slate-50 rounded-lg">
+                    <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-medium text-slate-900">Ley 25.326</p>
+                      <p className="text-sm text-slate-600">Proteccion de datos personales (cumplimos)</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Evidencia Multimedia */}
-              <div className="bg-gradient-to-br from-blue-50 to-white border-2 border-blue-100 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-blue-100 rounded-lg flex-shrink-0">
-                    <Camera className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 mb-2">Evidencia Multimedia</h3>
-                    <p className="text-slate-600 text-sm mb-3">
-                      Fotos y videos con metadatos EXIF que prueban cuando y donde se tomaron.
-                      Imposible de falsificar.
-                    </p>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-xs text-slate-500 mb-1">Valor probatorio:</p>
-                      <ul className="text-xs text-slate-700 space-y-1">
-                        <li>• GPS de donde se tomo la foto</li>
-                        <li>• Fecha y hora exacta de captura</li>
-                        <li>• Modelo de dispositivo</li>
-                        <li>• Hash SHA-256 (no fue alterada)</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bitacora de Novedades */}
-              <div className="bg-gradient-to-br from-amber-50 to-white border-2 border-amber-100 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-amber-100 rounded-lg flex-shrink-0">
-                    <ClipboardList className="h-6 w-6 text-amber-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 mb-2">Bitacora de Novedades</h3>
-                    <p className="text-slate-600 text-sm mb-3">
-                      6 meses de gestion progresiva documentada. Destruye el argumento de
-                      &quot;mobbing&quot; o &quot;persecucion&quot;.
-                    </p>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-xs text-slate-500 mb-1">Valor probatorio:</p>
-                      <ul className="text-xs text-slate-700 space-y-1">
-                        <li>• Recordatorios verbales documentados</li>
-                        <li>• Conversaciones sobre conducta</li>
-                        <li>• Capacitaciones y comunicaciones</li>
-                        <li>• Demuestra Art. 64 LCT (direccion)</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Audiencia de Descargo */}
-              <div className="bg-gradient-to-br from-purple-50 to-white border-2 border-purple-100 rounded-xl p-6">
-                <div className="flex items-start gap-4">
-                  <div className="p-3 bg-purple-100 rounded-lg flex-shrink-0">
-                    <MessageCircle className="h-6 w-6 text-purple-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-bold text-lg text-slate-900 mb-2">Audiencia de Descargo</h3>
-                    <p className="text-slate-600 text-sm mb-3">
-                      El empleado puede dar su version. Si confiesa, miente o calla:
-                      todas las opciones te benefician.
-                    </p>
-                    <div className="bg-white rounded-lg p-3 border">
-                      <p className="text-xs text-slate-500 mb-1">La trampa legal:</p>
-                      <ul className="text-xs text-slate-700 space-y-1">
-                        <li>• Si confiesa → Admitio el hecho</li>
-                        <li>• Si miente → GPS/evidencia lo contradice</li>
-                        <li>• Si calla → &quot;Declino ejercer su derecho&quot;</li>
-                        <li>• Demuestra debido proceso (Art. 67 LCT)</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8 bg-emerald-600 rounded-xl p-6 text-center text-white">
-              <p className="text-lg font-semibold mb-2">
-                Resultado: Expediente probatorio completo
-              </p>
-              <p className="text-emerald-100">
-                Cuando el abogado del empleado dice &quot;es persecucion&quot;, vos tenes testigos, fotos,
-                6 meses de gestion y la confesion del propio empleado.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Ley 27.742 - La oportunidad */}
-      <section className="py-16 bg-slate-50 border-y">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="flex items-start gap-4 mb-8">
-              <div className="p-3 bg-emerald-100 rounded-lg flex-shrink-0">
-                <Scale className="h-8 w-8 text-emerald-600" />
-              </div>
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 mb-2">
-                  Ley 27.742 - Reforma Laboral 2025
-                </h2>
-                <p className="text-slate-600 text-lg">
-                  La nueva ley te da una herramienta poderosa: <strong>la regla de los 30 dias</strong>.
-                </p>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl p-6 border-2 border-emerald-200 shadow-sm">
-              <div className="flex items-center gap-3 mb-4">
-                <Clock className="h-6 w-6 text-emerald-600" />
-                <h3 className="text-xl font-bold text-slate-900">Como funciona la regla:</h3>
-              </div>
-              <ol className="space-y-3 text-slate-700">
-                <li className="flex items-start gap-3">
-                  <span className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">1</span>
-                  <span>Notificas una sancion al empleado con Notificarte</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">2</span>
-                  <span>El empleado tiene <strong>30 dias corridos</strong> para impugnar</span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">3</span>
-                  <span>Si no impugna, la sancion queda <strong>firme automaticamente</strong></span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="bg-emerald-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">4</span>
-                  <span>Esa sancion firme tiene <strong>valor de prueba plena en juicio</strong></span>
-                </li>
-              </ol>
-              <div className="mt-6 p-4 bg-emerald-50 rounded-lg">
-                <p className="text-emerald-800 font-medium">
-                  Resultado: Con 2-3 sanciones firmes acumuladas, tu despido con causa es practicamente inobjetable.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Como funciona - Paso a paso */}
-      <section className="py-16" id="como-funciona">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Como funciona en 3 pasos
-            </h2>
-            <p className="text-lg text-slate-600">
-              De sancion a prueba legal en menos de 5 minutos
-            </p>
-          </div>
-          <div className="max-w-5xl mx-auto">
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="relative">
-                <div className="bg-white border-2 border-slate-200 rounded-xl p-6 h-full hover:border-emerald-300 transition-colors">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-xl font-bold text-white">1</span>
-                  </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">Creas la sancion</h3>
-                  <p className="text-slate-600 mb-4">
-                    Seleccionas empleado, tipo de sancion (apercibimiento, suspension), motivo y descripcion.
+              <div className="bg-white rounded-xl border border-slate-200 p-6">
+                <h3 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-emerald-600" />
+                  Veredicto legal
+                </h3>
+                <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 mb-4">
+                  <p className="text-emerald-800 font-medium">
+                    &ldquo;Bien ejecutado, el plan dara a las PyMEs una proteccion probatoria
+                    muy fuerte que reducira significativamente el riesgo de perder pleitos
+                    por falta de prueba.&rdquo;
                   </p>
-                  <div className="text-sm text-slate-500 bg-slate-50 rounded p-3">
-                    <Lock className="h-4 w-4 inline mr-1 text-emerald-600" />
-                    Se genera automaticamente un PDF con hash SHA-256 que garantiza que el documento no fue alterado.
-                  </div>
                 </div>
-              </div>
-              <div className="relative">
-                <div className="bg-white border-2 border-slate-200 rounded-xl p-6 h-full hover:border-emerald-300 transition-colors">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-xl font-bold text-white">2</span>
+                <div className="space-y-3 text-sm">
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span className="text-slate-700">Arquitectura validada legalmente</span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">El empleado confirma</h3>
-                  <p className="text-slate-600 mb-4">
-                    Recibe la notificacion por email y WhatsApp. Para ver el contenido debe:
-                  </p>
-                  <ul className="text-sm text-slate-600 space-y-2">
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-600" />
-                      Validar su identidad con CUIL
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-600" />
-                      Leer el contenido completo
-                    </li>
-                    <li className="flex items-center gap-2">
-                      <CheckCircle className="h-4 w-4 text-emerald-600" />
-                      Firmar declaracion jurada
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div className="relative">
-                <div className="bg-white border-2 border-slate-200 rounded-xl p-6 h-full hover:border-emerald-300 transition-colors">
-                  <div className="w-12 h-12 bg-emerald-600 rounded-full flex items-center justify-center mb-4">
-                    <span className="text-xl font-bold text-white">3</span>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span className="text-slate-700">Convenio de domicilio alineado con CSJN</span>
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900 mb-2">Queda firme</h3>
-                  <p className="text-slate-600 mb-4">
-                    Pasan 30 dias sin impugnacion. La sancion adquiere firmeza legal automaticamente.
-                  </p>
-                  <div className="text-sm bg-emerald-50 rounded p-3 text-emerald-800">
-                    <Download className="h-4 w-4 inline mr-1" />
-                    Descargas el <strong>paquete de evidencia</strong>: PDF original + cadena de custodia + metadata para presentar ante un juez.
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span className="text-slate-700">Verificacion de identidad robusta</span>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Fallback 72hs */}
-            <div className="mt-8 bg-amber-50 border border-amber-200 rounded-xl p-6">
-              <div className="flex items-start gap-4">
-                <AlertTriangle className="h-6 w-6 text-amber-600 flex-shrink-0 mt-1" />
-                <div>
-                  <h4 className="font-bold text-slate-900 mb-1">Y si el empleado no confirma?</h4>
-                  <p className="text-slate-600">
-                    Si pasan 72 horas sin confirmacion, te avisamos automaticamente y te damos el PDF listo
-                    para enviar por <strong>carta documento tradicional</strong>. Siempre tenes un backup legal.
-                  </p>
+                  <div className="flex items-center gap-2">
+                    <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                    <span className="text-slate-700">Hash + PKI aceptados por tribunales</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -406,643 +730,433 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Comparativa - Tabla completa */}
+      {/* Comparativa */}
       <section className="py-16 bg-slate-900 text-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto">
-            <h2 className="text-3xl font-bold text-center mb-4">
-              Comparativa de metodos de notificacion
-            </h2>
-            <p className="text-center text-slate-400 mb-10">
-              Notificarte vs los metodos tradicionales
-            </p>
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold mb-4">
+                Compara tus opciones
+              </h2>
+            </div>
 
-            {/* Tabla comparativa */}
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
+              <table className="w-full">
                 <thead>
-                  <tr className="border-b border-slate-700">
-                    <th className="text-left py-4 px-4 font-normal text-slate-400">Aspecto</th>
-                    <th className="text-center py-4 px-4">
-                      <div className="flex flex-col items-center">
-                        <XCircle className="h-6 w-6 text-red-400 mb-1" />
-                        <span className="font-semibold">Firma en legajo</span>
-                      </div>
-                    </th>
-                    <th className="text-center py-4 px-4">
-                      <div className="flex flex-col items-center">
-                        <AlertTriangle className="h-6 w-6 text-amber-400 mb-1" />
-                        <span className="font-semibold">Carta Documento</span>
-                      </div>
-                    </th>
-                    <th className="text-center py-4 px-4 bg-emerald-900/30 rounded-t-lg">
-                      <div className="flex flex-col items-center">
-                        <CheckCircle className="h-6 w-6 text-emerald-400 mb-1" />
-                        <span className="font-semibold">Notificarte</span>
-                      </div>
-                    </th>
+                  <tr className="border-b border-white/20">
+                    <th className="text-left py-4 px-4 text-slate-400 font-medium">Caracteristica</th>
+                    <th className="text-center py-4 px-4 text-slate-400 font-medium">Firma Legajo</th>
+                    <th className="text-center py-4 px-4 text-slate-400 font-medium">Carta Doc.</th>
+                    <th className="text-center py-4 px-4 font-medium text-emerald-400">Notificarte</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-800">
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Costo por sancion</td>
-                    <td className="py-4 px-4 text-center text-slate-400">$0</td>
-                    <td className="py-4 px-4 text-center text-slate-400">$15.000+</td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20 text-emerald-300 font-medium">Ilimitado</td>
+                <tbody className="text-sm">
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Prueba de entrega</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Prueba de identidad</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Prueba del hecho</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Testigos digitales</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Evidencia multimedia</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Blockchain timestamp</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Audiencia de descargo</td>
+                    <td className="text-center py-4 px-4"><Minus className="h-5 w-5 text-slate-500 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
+                  </tr>
+                  <tr className="border-b border-white/10">
+                    <td className="py-4 px-4">Pack para juicio</td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleX className="h-5 w-5 text-red-400 mx-auto" /></td>
+                    <td className="text-center py-4 px-4"><CircleCheck className="h-5 w-5 text-emerald-400 mx-auto" /></td>
                   </tr>
                   <tr>
-                    <td className="py-4 px-4 text-slate-300">Tiempo de entrega</td>
-                    <td className="py-4 px-4 text-center text-slate-400">Inmediato</td>
-                    <td className="py-4 px-4 text-center text-slate-400">3-7 dias</td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20 text-emerald-300 font-medium">60 segundos</td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Prueba de recepcion</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                      <span className="text-xs text-slate-500 block mt-1">&quot;No firme&quot;</span>
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <CheckCircle className="h-4 w-4 text-amber-400 mx-auto" />
-                      <span className="text-xs text-slate-500 block mt-1">Acuse de recibo</span>
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">CUIL + Declaracion jurada</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Prueba de lectura</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">Tracking completo</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Testigos incluidos</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">Declaraciones firmadas</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Evidencia multimedia</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">Fotos + GPS + EXIF</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Derecho a descargo</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">Audiencia virtual</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Cadena de custodia</td>
-                    <td className="py-4 px-4 text-center">
-                      <XCircle className="h-4 w-4 text-red-400 mx-auto" />
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <span className="text-xs text-slate-500">Solo acuse</span>
-                    </td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20">
-                      <CheckCircle className="h-4 w-4 text-emerald-400 mx-auto" />
-                      <span className="text-xs text-emerald-400 block mt-1">Hash + IP + timestamp</span>
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="py-4 px-4 text-slate-300">Impugnabilidad</td>
-                    <td className="py-4 px-4 text-center text-red-400">Alta</td>
-                    <td className="py-4 px-4 text-center text-amber-400">Media</td>
-                    <td className="py-4 px-4 text-center bg-emerald-900/20 text-emerald-300 font-medium rounded-b-lg">Baja</td>
+                    <td className="py-4 px-4 font-medium">Costo por sancion</td>
+                    <td className="text-center py-4 px-4 text-slate-400">$0</td>
+                    <td className="text-center py-4 px-4 text-slate-400">$15.000+</td>
+                    <td className="text-center py-4 px-4 text-emerald-400 font-medium">Desde $1.780</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-
-            <div className="mt-8 text-center">
-              <p className="text-slate-400 text-sm">
-                La firma en legajo es la opcion mas comun pero la mas debil juridicamente.
-                El empleado puede decir &quot;no firme&quot;, &quot;me obligaron&quot;, o simplemente &quot;no me acuerdo&quot;.
-              </p>
-            </div>
           </div>
         </div>
       </section>
 
-      {/* ROI - El numero que importa */}
+      {/* ROI */}
       <section className="py-16 bg-gradient-to-b from-emerald-50 to-white">
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              La matematica es simple
+            <h2 className="text-3xl font-bold text-slate-900 mb-8">
+              El calculo que no podes ignorar
             </h2>
-            <p className="text-lg text-slate-600 mb-10">
-              Una sola demanda evitada paga decadas de suscripcion
-            </p>
 
-            <div className="bg-white rounded-2xl shadow-xl border p-8 md:p-12">
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="text-left">
-                  <div className="space-y-6">
-                    <div>
-                      <p className="text-sm text-slate-500 uppercase tracking-wide mb-1">Costo promedio de demanda laboral perdida</p>
-                      <p className="text-4xl font-bold text-red-600">$72.000.000</p>
-                    </div>
-                    <div>
-                      <p className="text-sm text-slate-500 uppercase tracking-wide mb-1">Suscripcion mensual Notificarte</p>
-                      <p className="text-4xl font-bold text-emerald-600">$89.000</p>
-                    </div>
-                  </div>
-                </div>
-                <div className="bg-emerald-600 text-white rounded-xl p-6 text-center">
-                  <p className="text-sm uppercase tracking-wide mb-2 text-emerald-200">Una demanda evitada equivale a</p>
-                  <p className="text-6xl font-bold mb-2">67</p>
-                  <p className="text-xl">anos de suscripcion</p>
-                  <div className="mt-4 pt-4 border-t border-emerald-500">
-                    <p className="text-sm text-emerald-200">ROI: <span className="font-bold text-white">6.716%</span></p>
-                  </div>
-                </div>
+            <div className="grid md:grid-cols-2 gap-8 mb-8">
+              <div className="bg-red-50 border border-red-200 rounded-xl p-6">
+                <DollarSign className="h-10 w-10 text-red-500 mx-auto mb-4" />
+                <div className="text-4xl font-bold text-red-600 mb-2">$72.000.000</div>
+                <p className="text-slate-600">Costo promedio de perder un juicio laboral</p>
+                <p className="text-sm text-slate-500 mt-2">
+                  (Indemnizacion + multas + intereses)
+                </p>
+              </div>
+              <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6">
+                <Shield className="h-10 w-10 text-emerald-500 mx-auto mb-4" />
+                <div className="text-4xl font-bold text-emerald-600 mb-2">$89.000/mes</div>
+                <p className="text-slate-600">Plan PyME de Notificarte</p>
+                <p className="text-sm text-slate-500 mt-2">
+                  (Hasta 50 empleados, sanciones ilimitadas)
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-slate-900 text-white rounded-xl p-8">
+              <p className="text-lg mb-2">Un solo juicio evitado equivale a</p>
+              <div className="text-5xl font-bold text-emerald-400 mb-2">67 años</div>
+              <p className="text-slate-400">de suscripcion a Notificarte</p>
+              <div className="mt-4 pt-4 border-t border-white/20">
+                <span className="text-2xl font-bold text-emerald-400">ROI: 6.716%</span>
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Precio */}
-      <section className="py-16" id="precio">
+      {/* Pricing */}
+      <section className="py-16 bg-white" id="precio">
         <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto text-center mb-12">
-            <h2 className="text-3xl font-bold text-slate-900 mb-4">
-              Planes simples, sin letra chica
-            </h2>
-            <p className="text-lg text-slate-600">
-              Suscripcion mensual. Cancela cuando quieras.
+          <div className="max-w-5xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold text-slate-900 mb-4">
+                Planes simples y transparentes
+              </h2>
+              <p className="text-lg text-slate-600">
+                Sin costos ocultos. Sin sorpresas. Cancela cuando quieras.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-3 gap-6">
+              {/* Starter */}
+              <Card className="border-slate-200">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Starter</h3>
+                  <p className="text-sm text-slate-500 mb-4">Para microempresas</p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">$45.000</span>
+                    <span className="text-slate-500">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Hasta 10 empleados</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Sanciones ilimitadas</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Notificacion multicanal</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Pack de evidencias</span>
+                    </li>
+                  </ul>
+                  <Link href="/login" className="block">
+                    <Button variant="outline" className="w-full">Empezar</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* PyME - Destacado */}
+              <Card className="border-emerald-500 border-2 relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-500 text-white px-3 py-1 rounded-full text-xs font-medium">
+                  Mas Popular
+                </div>
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">PyME</h3>
+                  <p className="text-sm text-slate-500 mb-4">Para pequeñas y medianas</p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">$89.000</span>
+                    <span className="text-slate-500">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Hasta 50 empleados</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Todo lo de Starter</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Testigos digitales</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Evidencia multimedia</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Blockchain timestamp</span>
+                    </li>
+                  </ul>
+                  <Link href="/login" className="block">
+                    <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Empezar</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+
+              {/* Empresa */}
+              <Card className="border-slate-200">
+                <CardContent className="p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">Empresa</h3>
+                  <p className="text-sm text-slate-500 mb-4">Para empresas grandes</p>
+                  <div className="mb-6">
+                    <span className="text-4xl font-bold text-slate-900">$149.000</span>
+                    <span className="text-slate-500">/mes</span>
+                  </div>
+                  <ul className="space-y-3 mb-6 text-sm">
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Empleados ilimitados</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Todo lo de PyME</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Firma digital PKI</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>API de integracion</span>
+                    </li>
+                    <li className="flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4 text-emerald-500" />
+                      <span>Soporte prioritario</span>
+                    </li>
+                  </ul>
+                  <Link href="/login" className="block">
+                    <Button variant="outline" className="w-full">Contactar</Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            </div>
+
+            <p className="text-center text-sm text-slate-500 mt-8">
+              Todos los precios en ARS. Ajuste trimestral por inflacion. IVA no incluido.
             </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-            {/* Plan Starter */}
-            <Card className="border-2 hover:border-emerald-200 transition-colors">
-              <CardContent className="pt-6">
-                <div className="text-center mb-6">
-                  <Building2 className="h-10 w-10 text-slate-400 mx-auto mb-3" />
-                  <h3 className="text-xl font-bold">Starter</h3>
-                  <p className="text-sm text-slate-500">Hasta 10 empleados</p>
-                </div>
-                <div className="text-center mb-6">
-                  <span className="text-4xl font-bold">$45.000</span>
-                  <span className="text-slate-500">/mes</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Notificaciones ilimitadas
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Email + WhatsApp
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Paquete de evidencia
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Soporte por email
-                  </li>
-                </ul>
-                <Link href="/login" className="block">
-                  <Button className="w-full" variant="outline">Empezar</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Plan PyME - Destacado */}
-            <Card className="border-2 border-emerald-500 shadow-lg relative">
-              <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-sm font-medium px-3 py-1 rounded-full">
-                Mas Popular
-              </div>
-              <CardContent className="pt-6">
-                <div className="text-center mb-6">
-                  <Users className="h-10 w-10 text-emerald-600 mx-auto mb-3" />
-                  <h3 className="text-xl font-bold">PyME</h3>
-                  <p className="text-sm text-slate-500">Hasta 50 empleados</p>
-                </div>
-                <div className="text-center mb-6">
-                  <span className="text-4xl font-bold">$89.000</span>
-                  <span className="text-slate-500">/mes</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Todo de Starter
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Alertas automaticas 72hs
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Dashboard de seguimiento
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Soporte prioritario
-                  </li>
-                </ul>
-                <Link href="/login" className="block">
-                  <Button className="w-full bg-emerald-600 hover:bg-emerald-700">Empezar</Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            {/* Plan Empresa */}
-            <Card className="border-2 hover:border-emerald-200 transition-colors">
-              <CardContent className="pt-6">
-                <div className="text-center mb-6">
-                  <Building2 className="h-10 w-10 text-slate-400 mx-auto mb-3" />
-                  <h3 className="text-xl font-bold">Empresa</h3>
-                  <p className="text-sm text-slate-500">Empleados ilimitados</p>
-                </div>
-                <div className="text-center mb-6">
-                  <span className="text-4xl font-bold">$149.000</span>
-                  <span className="text-slate-500">/mes</span>
-                </div>
-                <ul className="space-y-3 mb-6">
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Todo de PyME
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Multiples empresas
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    API de integracion
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <CheckCircle className="h-4 w-4 text-emerald-600" />
-                    Soporte telefonico
-                  </li>
-                </ul>
-                <Link href="/login" className="block">
-                  <Button className="w-full" variant="outline">Contactar</Button>
-                </Link>
-              </CardContent>
-            </Card>
           </div>
         </div>
       </section>
 
-      {/* FAQ expandido - Para empresas y abogados */}
+      {/* FAQ */}
       <section className="py-16 bg-slate-50" id="faq">
         <div className="container mx-auto px-4">
           <div className="max-w-3xl mx-auto">
-            <div className="text-center mb-10">
-              <h2 className="text-2xl font-bold mb-2">Preguntas frecuentes</h2>
-              <p className="text-slate-600">Para empresas y abogados laboralistas</p>
-            </div>
-
-            <div className="space-y-3">
-              {/* Preguntas generales */}
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Tiene validez legal en Argentina?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    Si. El sistema cumple con: <strong>Ley 27.742</strong> (Reforma Laboral 2025) para plazo de 30 dias
-                    e impugnacion, <strong>Art. 67 LCT</strong> sobre poder disciplinario, <strong>Art. 220 LCT</strong> sobre
-                    limites de suspension, y <strong>Ley 25.506</strong> de Firma Digital. El hash SHA-256 + timestamp
-                    constituyen firma electronica valida.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Como prueba esto que el hecho realmente ocurrio?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm mb-3">
-                    Notificarte no es solo un notificador. Construye un <strong>expediente probatorio completo</strong>:
-                  </p>
-                  <ul className="text-slate-600 text-sm space-y-1 ml-4">
-                    <li>1. <strong>Testigos digitales</strong>: Declaraciones firmadas EN EL MOMENTO del hecho</li>
-                    <li>2. <strong>Evidencia multimedia</strong>: Fotos/videos con metadatos EXIF verificables</li>
-                    <li>3. <strong>Bitacora</strong>: 6 meses de gestion progresiva documentada</li>
-                    <li>4. <strong>Descargo</strong>: Confesiones o contradicciones del propio empleado</li>
-                  </ul>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Que pasa si el testigo dice algo distinto en juicio?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    Tenes su declaracion original firmada digitalmente con: hash SHA-256 inmutable,
-                    timestamp exacto (horas del hecho, no meses despues), IP de origen (prueba que declaro
-                    desde su dispositivo, no bajo coaccion), y declaracion jurada bajo apercibimiento de
-                    falso testimonio (Art. 275 CP). Si cambia su version, presentas la declaracion original
-                    y queda evidenciada la contradiccion.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Como demuestra que no es mobbing/persecucion?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm mb-3">
-                    La <strong>Bitacora de Novedades</strong> documenta 6 meses de gestion progresiva:
-                    recordatorios verbales, conversaciones sobre conducta, capacitaciones. Cuando el abogado
-                    dice &quot;es persecucion&quot;, el empleador muestra:
-                  </p>
-                  <ul className="text-slate-600 text-sm space-y-1 ml-4 italic">
-                    <li>&quot;El 15/03 se le recordo uso de EPP&quot;</li>
-                    <li>&quot;El 20/04 se hablo sobre puntualidad&quot;</li>
-                    <li>&quot;El 10/05 se le dio capacitacion de seguridad&quot;</li>
-                    <li>&quot;El 15/06, despues de 3 meses de gestion, se aplico sancion&quot;</li>
-                  </ul>
-                  <p className="text-slate-600 text-sm mt-3">
-                    Esto demuestra <strong>direccion y organizacion</strong> (Art. 64 LCT), no persecucion.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Y si el empleado dice que no le dieron derecho a defensa?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    La <strong>Audiencia de Descargo Virtual</strong> soluciona esto. Al notificar, el sistema
-                    crea automaticamente un registro de descargo. El empleado recibe link para presentar su
-                    version (30 dias de plazo). Puede elegir: EJERCER descargo (escribir su version) o
-                    DECLINAR (no presentar). Todo queda registrado con hash, IP y timestamp. Si calla,
-                    el registro dice &quot;Declino ejercer su derecho a defensa&quot;.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Como verifico que un documento no fue alterado?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    Cada documento tiene: <strong>Hash SHA-256</strong> (codigo unico del contenido),
-                    <strong> Timestamp</strong> (momento exacto de generacion), y un
-                    <strong> Endpoint de verificacion</strong> que permite a cualquiera (juez, perito, abogado)
-                    verificar la integridad. Si alguien altera un solo caracter, el hash cambia completamente.
-                    Incluimos documentacion tecnica para peritos informaticos.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Que pasa si el empleado no tiene email o WhatsApp?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    Te generamos automaticamente el PDF formateado para enviar por carta documento tradicional.
-                    El sistema tiene fallback fisico: si no confirma en 72 horas, te alertamos y te damos
-                    el PDF listo. Se registra que se intento notificacion digital primero.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-
-              <Collapsible className="bg-white rounded-lg border">
-                <CollapsibleTrigger className="flex items-center justify-between w-full p-5 text-left">
-                  <span className="font-semibold">Y si el empleado dice que lo obligaron a firmar?</span>
-                  <ChevronDown className="h-5 w-5 text-slate-400" />
-                </CollapsibleTrigger>
-                <CollapsibleContent className="px-5 pb-5">
-                  <p className="text-slate-600 text-sm">
-                    El sistema registra: <strong>IP de origen</strong> (geolocalizable - si firmo desde su casa,
-                    no desde la empresa), <strong>User-Agent</strong> (si uso su celular personal),
-                    <strong> Timestamp</strong> (si firmo a las 22:00, fuera de horario laboral). Si alega
-                    coaccion, debe explicar por que el IP corresponde a su zona habitual, por que uso su
-                    dispositivo personal, y por que acepto la declaracion jurada voluntariamente.
-                  </p>
-                </CollapsibleContent>
-              </Collapsible>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Validacion Legal - NUEVO */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <div className="max-w-4xl mx-auto">
-            <div className="text-center mb-10">
-              <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-100 text-emerald-700 rounded-full text-sm font-medium mb-4">
-                <Gavel className="h-4 w-4" />
-                Marco Legal Argentino
-              </div>
+            <div className="text-center mb-12">
               <h2 className="text-3xl font-bold text-slate-900 mb-4">
-                Validacion Legal Completa
+                Preguntas frecuentes
               </h2>
-              <p className="text-lg text-slate-600">
-                Notificarte cumple con toda la normativa laboral argentina vigente
-              </p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-6 mb-8">
-              <div className="bg-slate-50 rounded-xl p-6 border">
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <Scale className="h-5 w-5 text-emerald-600" />
-                  Leyes que cumplimos
-                </h3>
-                <ul className="space-y-3 text-sm">
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Ley 27.742</strong> - Reforma Laboral 2025
-                      <p className="text-slate-500">Plazo de 30 dias para impugnar, notificacion fehaciente</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Art. 67 LCT</strong> - Poder disciplinario
-                      <p className="text-slate-500">Facultades del empleador para sancionar</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Art. 220 LCT</strong> - Limite de suspensiones
-                      <p className="text-slate-500">Maximo 30 dias de suspension por ano</p>
-                    </div>
-                  </li>
-                  <li className="flex items-start gap-3">
-                    <CheckCircle className="h-4 w-4 text-emerald-600 mt-0.5 flex-shrink-0" />
-                    <div>
-                      <strong>Ley 25.506</strong> - Firma Digital
-                      <p className="text-slate-500">Hash SHA-256 + timestamp = firma electronica valida</p>
-                    </div>
-                  </li>
-                </ul>
-              </div>
+            <div className="space-y-4">
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Tiene validez legal en Argentina?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Si. El sistema esta diseñado en base a la Acordada 31/2011 de la CSJN (domicilio electronico),
+                    el Art. 288 del Codigo Civil y Comercial (firma digital), la Ley 27.742 (plazo de 30 dias),
+                    y el Art. 67 de la LCT (poder disciplinario). Fue validado por abogados laboralistas.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
 
-              <div className="bg-slate-50 rounded-xl p-6 border">
-                <h3 className="font-bold text-lg mb-4 flex items-center gap-2">
-                  <FileText className="h-5 w-5 text-emerald-600" />
-                  Paquete de Evidencia
-                </h3>
-                <p className="text-sm text-slate-600 mb-4">
-                  Cada sancion genera un paquete ZIP con cadena de custodia completa:
-                </p>
-                <div className="bg-white rounded-lg p-4 border text-xs font-mono">
-                  <div className="text-slate-400">paquete_evidencia_[id].zip</div>
-                  <div className="ml-2 space-y-1 text-slate-600">
-                    <div>├── sancion_original.pdf</div>
-                    <div>├── cadena_custodia.pdf</div>
-                    <div>├── protocolo_preservacion.pdf</div>
-                    <div>├── /evidencia/ (fotos + metadatos)</div>
-                    <div>├── /testigos/ (declaraciones)</div>
-                    <div>├── /descargo/ (respuesta empleado)</div>
-                    <div>├── /bitacora/ (6 meses de contexto)</div>
-                    <div>└── /verificacion/ (hashes.json)</div>
-                  </div>
-                </div>
-                <Link href="/verificar" className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-700 mt-4">
-                  Ver verificador de integridad
-                  <ExternalLink className="h-3 w-3" />
-                </Link>
-              </div>
-            </div>
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Por que necesito el Convenio de Domicilio Electronico?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Es el &ldquo;ancla juridica&rdquo; que da validez a todas las notificaciones digitales.
+                    Sin este convenio, el empleado puede alegar &ldquo;nunca acepte recibir notificaciones por WhatsApp&rdquo;.
+                    Con el convenio firmado, esa defensa se desmorona porque el mismo constituyo esos medios como domicilios legales.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
 
-            <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-6 text-center">
-              <p className="text-emerald-800">
-                <strong>Para peritos informaticos:</strong> Incluimos documentacion tecnica completa sobre
-                SHA-256, almacenamiento inmutable, y cadena de custodia para facilitar el analisis pericial.
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Que pasa si el empleado dice que no fue el quien leyo la notificacion?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Para acceder a la notificacion, el empleado debe: (1) ingresar su CUIL completo,
+                    (2) recibir e ingresar un codigo OTP enviado al telefono que el mismo constituyo,
+                    y (3) tomarse una selfie con la pantalla visible. Tenemos la foto del empleado leyendo la sancion,
+                    su IP, timestamp y el codigo OTP validado. Es casi imposible sostener que &ldquo;no fue el&rdquo;.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
 
-      {/* CTA para Abogados - NUEVO */}
-      <section className="py-16 bg-slate-900">
-        <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 px-4 py-2 bg-emerald-500/20 text-emerald-400 rounded-full text-sm font-medium mb-6">
-              <Scale className="h-4 w-4" />
-              Para Profesionales
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Que pasa si el empleado no confirma la lectura?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Si no confirma en 48 horas, el sistema te alerta y genera una &ldquo;Cedula de Aviso de Notificacion Pendiente&rdquo;
+                    que podes imprimir y hacer firmar en persona. Si se niega a firmar, lo documentas con dos testigos.
+                    El plazo de 30 dias corre desde esa instancia fisica. Siempre tenes un fallback.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Como demuestro que el documento no fue alterado?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Cada documento tiene un hash SHA-256 (huella digital unica) que se ancla en la blockchain de Bitcoin
+                    via OpenTimestamp. Cualquier modificacion al documento cambiaria el hash. Un perito informatico
+                    puede verificar la integridad en segundos comparando el hash original con el del documento presentado.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Como pruebo que el hecho realmente ocurrio?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Con el sistema de 5 capas: (1) Testigos digitales que firman declaraciones bajo juramento con hash,
+                    (2) Evidencia multimedia con metadatos EXIF (GPS, fecha, dispositivo),
+                    (3) Bitacora de novedades que muestra gestion progresiva (no mobbing),
+                    (4) Audiencia de descargo donde el empleado puede confesar o contradecirse,
+                    (5) Pack de evidencias completo para el juicio.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Es seguro? ¿Que pasa con los datos personales?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    Cumplimos con la Ley 25.326 de Proteccion de Datos Personales. La base de datos esta registrada
+                    ante la AAIP. El Convenio de Domicilio Electronico incluye el consentimiento expreso para el
+                    tratamiento de datos. Los datos se almacenan encriptados y se retienen por el tiempo legal necesario.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
+
+              <Collapsible>
+                <CollapsibleTrigger className="flex items-center justify-between w-full p-4 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 transition-colors">
+                  <span className="font-medium text-slate-900 text-left">¿Puedo usar esto para despidos?</span>
+                  <ChevronDown className="h-5 w-5 text-slate-500" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="p-4 bg-white border border-t-0 border-slate-200 rounded-b-lg">
+                  <p className="text-slate-600">
+                    El sistema esta diseñado para sanciones disciplinarias (apercibimientos y suspensiones).
+                    Para el despido en si, recomendamos carta documento por la mayor solemnidad del acto.
+                    Pero todo el historial de sanciones documentado en Notificarte sera evidencia crucial
+                    para justificar un despido con causa.
+                  </p>
+                </CollapsibleContent>
+              </Collapsible>
             </div>
-            <h2 className="text-3xl font-bold text-white mb-4">
-              Sos abogado laboralista?
-            </h2>
-            <p className="text-lg text-slate-300 mb-8">
-              Agenda una demo tecnica donde te mostramos la cadena de custodia,
-              el protocolo de preservacion, y como el sistema resiste objeciones en juicio.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <a href="mailto:demo@notificarte.com.ar?subject=Demo%20tecnica%20para%20abogado">
-                <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 text-lg px-8">
-                  Agendar Demo Tecnica
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </a>
-              <a href="#faq">
-                <Button size="lg" variant="outline" className="text-lg px-8 border-slate-600 text-slate-300 hover:bg-slate-800">
-                  Ver FAQ Juridico
-                </Button>
-              </a>
-            </div>
-            <p className="text-sm text-slate-500 mt-6">
-              Tambien ofrecemos programa de referidos para estudios juridicos
-            </p>
           </div>
         </div>
       </section>
 
       {/* CTA Final */}
-      <section className="py-20 bg-emerald-600">
+      <section className="py-20 bg-emerald-600 text-white">
         <div className="container mx-auto px-4">
-          <div className="max-w-3xl mx-auto text-center text-white">
-            <h2 className="text-3xl font-bold mb-4">
-              Cada dia sin documentacion es un riesgo
+          <div className="max-w-3xl mx-auto text-center">
+            <h2 className="text-3xl lg:text-4xl font-bold mb-6">
+              Protege tu PyME hoy
             </h2>
             <p className="text-xl text-emerald-100 mb-8">
-              Empeza hoy a construir el historial de sanciones que va a proteger tu empresa manana.
+              Las primeras 3 sanciones son gratis. Sin tarjeta de credito.
+              <br />
+              Empeza a construir tu escudo legal ahora.
             </p>
             <Link href="/login">
-              <Button size="lg" variant="secondary" className="text-lg px-12">
+              <Button size="lg" className="text-lg px-10 bg-white text-emerald-600 hover:bg-emerald-50">
                 Crear Cuenta Gratis
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <p className="text-sm text-emerald-200 mt-4">
-              Primeras 5 notificaciones gratis. Sin tarjeta de credito.
-            </p>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-slate-900 text-slate-400 py-12">
+      <footer className="py-12 bg-slate-900 text-white">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-2">
-              <Shield className="h-6 w-6 text-emerald-500" />
-              <span className="text-white font-semibold">Notificarte</span>
+          <div className="max-w-5xl mx-auto">
+            <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+              <div className="flex items-center gap-2">
+                <Shield className="h-6 w-6 text-emerald-500" />
+                <span className="font-semibold">Notificarte</span>
+              </div>
+              <div className="flex items-center gap-6 text-sm text-slate-400">
+                <a href="#como-funciona" className="hover:text-white">Como Funciona</a>
+                <a href="#validacion-legal" className="hover:text-white">Validacion Legal</a>
+                <a href="#precio" className="hover:text-white">Precios</a>
+                <a href="#faq" className="hover:text-white">FAQ</a>
+              </div>
             </div>
-            <p className="text-sm">
-              Sistema de notificaciones laborales fehacientes para PyMEs argentinas
-            </p>
-            <div className="flex gap-4 text-sm">
-              <a href="#" className="hover:text-white">
-                Terminos
-              </a>
-              <a href="#" className="hover:text-white">
-                Privacidad
-              </a>
-              <a href="#" className="hover:text-white">
-                Contacto
-              </a>
+            <div className="mt-8 pt-8 border-t border-slate-800 text-center text-sm text-slate-500">
+              <p>© 2026 Notificarte. El escudo legal para PyMEs argentinas.</p>
+              <p className="mt-2">
+                Validado por abogados laboralistas · Acordada 31/2011 CSJN · Art. 288 CCyC · Ley 27.742
+              </p>
             </div>
           </div>
         </div>

@@ -1149,3 +1149,200 @@ export const TIPO_EVENTO_TIMELINE_COLORES: Record<string, string> = {
   descargo_vencido: "red",
   sancion_firme: "green",
 };
+
+// ============================================
+// CONVENIO DE DOMICILIO ELECTRÓNICO (Fase 0)
+// Fundamento Legal: Acordada N° 31/2011 CSJN
+// ============================================
+
+export type EstadoConvenio =
+  | "pendiente"        // Enviado pero no firmado
+  | "firmado_digital"  // Firmado digitalmente (checkbox + OTP)
+  | "firmado_papel"    // Firmado en papel y escaneado
+  | "revocado";        // Revocado por el empleado o empresa
+
+export type CanalOTP = "sms" | "whatsapp" | "email";
+
+export type AccionLogConvenio =
+  | "creado"
+  | "enviado_email"
+  | "link_abierto"
+  | "checkbox_aceptado"
+  | "otp_enviado"
+  | "otp_validado"
+  | "otp_fallido"
+  | "firmado_digital"
+  | "pdf_subido"
+  | "firmado_papel"
+  | "revocado"
+  | "reenvio_solicitado";
+
+export interface ConvenioDomicilio {
+  id: string;
+  empresa_id: string;
+  empleado_id: string;
+
+  // Versión del convenio
+  version_convenio: string;
+
+  // Estado
+  estado: EstadoConvenio;
+
+  // Datos del convenio
+  email_constituido: string;       // Email donde acepta recibir notificaciones
+  telefono_constituido?: string;   // Teléfono para SMS/WhatsApp
+  acepta_notificaciones_digitales: boolean;
+  acepta_biometricos: boolean;     // Consentimiento Ley 25.326
+
+  // Firma digital
+  firma_checkbox_at?: string;
+  firma_otp_verificado: boolean;
+  firma_otp_codigo_hash?: string;
+  firma_otp_at?: string;
+  firma_ip?: string;
+  firma_user_agent?: string;
+  firma_dispositivo?: Record<string, unknown>;
+
+  // Firma en papel
+  pdf_convenio_url?: string;
+  pdf_convenio_hash?: string;
+  fecha_firma_papel?: string;
+
+  // Hash del convenio completo
+  hash_convenio?: string;
+
+  // Token único para firma
+  token_firma: string;
+  token_expira_at: string;
+
+  // Auditoría
+  created_at: string;
+  updated_at: string;
+  firmado_at?: string;
+  revocado_at?: string;
+  motivo_revocacion?: string;
+
+  // Relaciones (cuando se hace join)
+  empleado?: Empleado;
+  empresa?: Empresa;
+}
+
+export interface LogConvenio {
+  id: string;
+  convenio_id: string;
+  accion: AccionLogConvenio;
+  ip?: string;
+  user_agent?: string;
+  metadata: Record<string, unknown>;
+  created_at: string;
+}
+
+export interface CodigoOTPConvenio {
+  id: string;
+  convenio_id: string;
+  codigo_hash: string;
+  canal: CanalOTP;
+  telefono_enviado?: string;
+  email_enviado?: string;
+  intentos: number;
+  max_intentos: number;
+  usado: boolean;
+  usado_at?: string;
+  expira_at: string;
+  created_at: string;
+}
+
+export interface CrearConvenioForm {
+  empleado_id: string;
+  email_constituido: string;
+  telefono_constituido?: string;
+}
+
+export interface FirmarConvenioDigitalForm {
+  acepta_notificaciones_digitales: boolean;
+  acepta_biometricos: boolean;
+  codigo_otp: string;
+}
+
+// Datos del convenio para vista pública (token)
+export interface ConvenioPublico {
+  id: string;
+  empresa_nombre: string;
+  empresa_cuit: string;
+  empleado_nombre: string;
+  empleado_cuil: string;
+  email_constituido: string;
+  telefono_constituido?: string;
+  estado: EstadoConvenio;
+  version_convenio: string;
+  otp_enviado: boolean;
+  token_valido: boolean;
+  dias_para_expirar: number;
+}
+
+// Labels para UI
+export const ESTADO_CONVENIO_LABELS: Record<EstadoConvenio, string> = {
+  pendiente: "Pendiente de firma",
+  firmado_digital: "Firmado digitalmente",
+  firmado_papel: "Firmado en papel",
+  revocado: "Revocado",
+};
+
+export const ESTADO_CONVENIO_COLORES: Record<EstadoConvenio, { bg: string; text: string; border: string }> = {
+  pendiente: { bg: "bg-yellow-50", text: "text-yellow-700", border: "border-yellow-200" },
+  firmado_digital: { bg: "bg-green-50", text: "text-green-700", border: "border-green-200" },
+  firmado_papel: { bg: "bg-blue-50", text: "text-blue-700", border: "border-blue-200" },
+  revocado: { bg: "bg-red-50", text: "text-red-700", border: "border-red-200" },
+};
+
+// Textos legales del Convenio
+export const TEXTOS_CONVENIO = {
+  // Texto principal del convenio
+  TEXTO_CONVENIO: `CONVENIO DE CONSTITUCIÓN DE DOMICILIO ELECTRÓNICO
+(Conforme Acordada N° 31/2011 CSJN y normativa concordante)
+
+Por el presente, el trabajador abajo identificado CONSTITUYE DOMICILIO ELECTRÓNICO a los efectos de recibir notificaciones laborales de su empleador, en los términos siguientes:
+
+1. DOMICILIO ELECTRÓNICO: El trabajador declara que la dirección de correo electrónico y/o número telefónico indicados constituyen su domicilio electrónico a todos los efectos laborales.
+
+2. VALIDEZ DE NOTIFICACIONES: Las comunicaciones enviadas al domicilio electrónico constituido tendrán la misma validez legal que las notificaciones realizadas en el domicilio físico del trabajador.
+
+3. CONFIRMACIÓN DE RECEPCIÓN: El trabajador se compromete a confirmar la recepción de las notificaciones mediante el sistema proporcionado por el empleador.
+
+4. ACTUALIZACIÓN: El trabajador se obliga a comunicar cualquier cambio en sus datos de contacto dentro de las 48 horas de producido.
+
+5. ALTERNATIVA FÍSICA: El trabajador podrá solicitar en cualquier momento recibir las notificaciones por medios físicos (carta documento), sin que ello implique perjuicio alguno.
+
+6. PROTECCIÓN DE DATOS: Los datos personales serán tratados conforme a la Ley 25.326 de Protección de Datos Personales.
+
+7. REVOCACIÓN: Este convenio podrá ser revocado por el trabajador en cualquier momento mediante comunicación fehaciente al empleador.`,
+
+  // Checkbox de aceptación
+  CHECKBOX_ACEPTACION: `Declaro que:
+• He leído y comprendido los términos del presente convenio
+• Acepto voluntariamente constituir domicilio electrónico en los datos indicados
+• Entiendo que las notificaciones enviadas a este domicilio tendrán plena validez legal
+• Conozco mi derecho a solicitar notificaciones físicas en cualquier momento`,
+
+  // Checkbox de consentimiento biométrico (Ley 25.326)
+  CHECKBOX_BIOMETRICOS: `CONSENTIMIENTO PARA TRATAMIENTO DE DATOS BIOMÉTRICOS
+(Conforme Ley 25.326 de Protección de Datos Personales)
+
+Autorizo expresamente a mi empleador a:
+• Capturar y almacenar mi imagen facial (selfie) para verificación de identidad
+• Utilizar tecnología de detección de vida (liveness) para confirmar mi presencia
+• Conservar estos datos por el tiempo que dure la relación laboral y hasta 2 años después
+
+Entiendo que:
+• Estos datos son sensibles según la Ley 25.326
+• Puedo ejercer mis derechos de acceso, rectificación, actualización y supresión (ARCO)
+• La base de datos está registrada ante la Agencia de Acceso a la Información Pública`,
+
+  // Aviso sobre alternativa física
+  AVISO_ALTERNATIVA_FISICA: `Si prefiere no recibir notificaciones electrónicas, puede solicitar que todas las comunicaciones laborales se realicen por carta documento u otro medio físico. Esta opción no implica ningún perjuicio para usted.`,
+} as const;
+
+// Constantes
+export const DIAS_EXPIRACION_TOKEN_CONVENIO = 7;
+export const MINUTOS_EXPIRACION_OTP = 10;
+export const MAX_INTENTOS_OTP = 3;

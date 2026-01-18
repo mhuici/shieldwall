@@ -19,7 +19,7 @@ export async function GET(
   // Verificar empresa
   const { data: empresa } = await supabase
     .from("empresas")
-    .select("id, razon_social, cuit")
+    .select("id, razon_social, cuit, direccion_legal")
     .eq("user_id", user.id)
     .single();
 
@@ -32,7 +32,7 @@ export async function GET(
     .from("notificaciones")
     .select(`
       *,
-      empleado:empleados(nombre, cuil, email, telefono)
+      empleado:empleados(id, nombre, cuil, email, telefono, convenio_firmado, convenio_id, fecha_convenio)
     `)
     .eq("id", notificacionId)
     .eq("empresa_id", empresa.id)
@@ -287,47 +287,285 @@ export async function GET(
   zip.file("07_verificacion/timeline_hashes.json", JSON.stringify(timelineHashes, null, 2));
 
   // =====================================================
-  // CADENA DE CUSTODIA
+  // 8. CONVENIO DE DOMICILIO ELECTRÓNICO
+  // =====================================================
+
+  const empleadoData = notificacion.empleado as { id: string; convenio_id?: string } | null;
+
+  if (empleadoData?.convenio_id) {
+    const { data: convenio } = await supabase
+      .from("convenios_domicilio")
+      .select("*")
+      .eq("id", empleadoData.convenio_id)
+      .single();
+
+    if (convenio) {
+      contenidoIncluido.convenio = true;
+
+      const convenioInfo = {
+        id: convenio.id,
+        estado: convenio.estado,
+        version_convenio: convenio.version_convenio,
+        email_constituido: convenio.email_constituido,
+        telefono_constituido: convenio.telefono_constituido,
+        acepta_notificaciones_digitales: convenio.acepta_notificaciones_digitales,
+        acepta_biometricos: convenio.acepta_biometricos,
+        firma_checkbox_at: convenio.firma_checkbox_at,
+        firma_otp_verificado: convenio.firma_otp_verificado,
+        firma_otp_at: convenio.firma_otp_at,
+        firmado_at: convenio.firmado_at,
+        hash_convenio: convenio.hash_convenio,
+        fundamento_legal: "Acordada N° 31/2011 CSJN",
+      };
+
+      zip.file("08_convenio/convenio_domicilio.json", JSON.stringify(convenioInfo, null, 2));
+
+      if (convenio.hash_convenio) {
+        timelineHashes.push({
+          tipo: "convenio",
+          id: convenio.id,
+          hash: convenio.hash_convenio,
+          timestamp: convenio.firmado_at || convenio.created_at,
+        });
+      }
+    }
+  }
+
+  // =====================================================
+  // 9. VALIDACIÓN DE IDENTIDAD (OTP + SELFIE)
+  // =====================================================
+
+  const validacionIdentidad = {
+    cuil_validado: {
+      validado: !!notificacion.identidad_validada_at,
+      timestamp: notificacion.identidad_validada_at,
+      cuil_ingresado: notificacion.identidad_cuil_ingresado,
+      ip: notificacion.identidad_ip,
+      user_agent: notificacion.identidad_user_agent,
+    },
+    otp_verificado: {
+      verificado: notificacion.otp_validado,
+      enviado_at: notificacion.otp_enviado_at,
+      verificado_at: notificacion.otp_validado_at,
+      canal: notificacion.otp_canal,
+      intentos: notificacion.otp_intentos,
+    },
+    selfie_capturada: {
+      capturada: !!notificacion.selfie_url,
+      url: notificacion.selfie_url,
+      hash: notificacion.selfie_hash,
+      capturada_at: notificacion.selfie_capturada_at,
+      ip: notificacion.selfie_ip,
+      metadata: notificacion.selfie_metadata,
+    },
+    fundamento_legal: "Acordada N° 31/2011 CSJN - Requisitos de acreditación de identidad",
+  };
+
+  zip.file("09_validacion_identidad/validacion.json", JSON.stringify(validacionIdentidad, null, 2));
+  contenidoIncluido.validacion_identidad = true;
+
+  // =====================================================
+  // 10. OPENTIMESTAMP (BLOCKCHAIN)
+  // =====================================================
+
+  if (notificacion.ots_estado && notificacion.ots_estado !== "no_creado") {
+    const timestampBlockchain = {
+      estado: notificacion.ots_estado,
+      timestamp_pendiente: notificacion.ots_timestamp_pendiente,
+      timestamp_confirmado: notificacion.ots_timestamp_confirmado,
+      bitcoin_block_height: notificacion.ots_bitcoin_block_height,
+      bitcoin_block_hash: notificacion.ots_bitcoin_block_hash,
+      archivo_ots_base64: notificacion.ots_file_base64,
+      metadata: notificacion.ots_metadata,
+      protocolo: "OpenTimestamps",
+      blockchain: "Bitcoin",
+      fundamento_legal: "Acordada N° 3/2015 CSJN - Fecha cierta en sistemas informáticos",
+      instrucciones_verificacion: "El archivo .ots puede verificarse en https://opentimestamps.org/",
+    };
+
+    zip.file("10_blockchain/opentimestamp.json", JSON.stringify(timestampBlockchain, null, 2));
+
+    if (notificacion.ots_file_base64) {
+      const otsBuffer = Buffer.from(notificacion.ots_file_base64, "base64");
+      zip.file("10_blockchain/documento.ots", otsBuffer);
+    }
+
+    contenidoIncluido.opentimestamp = true;
+  }
+
+  // =====================================================
+  // 11. FIRMA DIGITAL PKI
+  // =====================================================
+
+  if (notificacion.firma_digital_aplicada) {
+    const firmaPKI = {
+      firmado: true,
+      firmado_por: notificacion.firma_digital_firmante,
+      fecha_firma: notificacion.firma_digital_fecha,
+      algoritmo: notificacion.firma_digital_algoritmo,
+      certificado_serial: notificacion.firma_digital_certificado_serial,
+      certificado_emisor: notificacion.firma_digital_certificado_emisor,
+      firma_base64: notificacion.firma_digital_base64,
+      metadata: notificacion.firma_digital_metadata,
+      fundamento_legal: "Art. 288 Código Civil y Comercial - Equivalencia con firma ológrafa",
+    };
+
+    zip.file("11_firma_pki/firma_digital.json", JSON.stringify(firmaPKI, null, 2));
+    contenidoIncluido.firma_pki = true;
+  }
+
+  // =====================================================
+  // 12. EVENTOS DE AUDITORIA
+  // =====================================================
+
+  const { data: eventos } = await supabase
+    .from("eventos")
+    .select("*")
+    .eq("notificacion_id", notificacionId)
+    .order("created_at", { ascending: true });
+
+  if (eventos && eventos.length > 0) {
+    const eventosFormateados = eventos.map(e => ({
+      tipo: e.tipo,
+      timestamp: e.created_at,
+      ip: e.ip,
+      user_agent: e.user_agent,
+      metadata: e.metadata,
+    }));
+
+    zip.file("12_auditoria/eventos.json", JSON.stringify(eventosFormateados, null, 2));
+    contenidoIncluido.eventos_auditoria = eventos.length;
+  }
+
+  // =====================================================
+  // CADENA DE CUSTODIA COMPLETA
   // =====================================================
 
   const cadenaCustodia = {
+    version: "2.0",
     paquete: {
       generado_at: timestampGeneracion,
       generado_por: user.email,
+      sistema: "NotiLegal v2.0",
+      hash_algoritmo: "SHA-256",
+    },
+    empresa: {
+      razon_social: empresa.razon_social,
+      cuit: empresa.cuit,
+      direccion_legal: empresa.direccion_legal,
     },
     notificacion: {
       id: notificacion.id,
+      tipo: notificacion.tipo,
+      estado: notificacion.estado,
       created_at: notificacion.created_at,
       hash_original: notificacion.hash_sha256,
     },
+    empleado: {
+      nombre: (notificacion.empleado as { nombre?: string })?.nombre,
+      cuil: (notificacion.empleado as { cuil?: string })?.cuil,
+      convenio_firmado: (notificacion.empleado as { convenio_firmado?: boolean })?.convenio_firmado,
+    },
+    elementos_probatorios: {
+      convenio_domicilio: contenidoIncluido.convenio || false,
+      validacion_cuil: !!notificacion.identidad_validada_at,
+      validacion_otp: notificacion.otp_validado || false,
+      selfie_capturada: !!notificacion.selfie_url,
+      firma_digital_pki: notificacion.firma_digital_aplicada || false,
+      opentimestamp: contenidoIncluido.opentimestamp || false,
+      testigos: contenidoIncluido.testigos || 0,
+      evidencias: contenidoIncluido.evidencias || 0,
+      descargo: contenidoIncluido.descargo || false,
+    },
+    fundamentos_legales: [
+      { norma: "Acordada N° 31/2011 CSJN", descripcion: "Domicilio electrónico y validación de identidad" },
+      { norma: "Art. 288 CCyC", descripcion: "Equivalencia firma digital - firma ológrafa" },
+      { norma: "Acordada N° 3/2015 CSJN", descripcion: "Fecha cierta en sistemas informáticos" },
+      { norma: "Ley 25.326", descripcion: "Protección de datos personales" },
+      { norma: "Ley 27.742", descripcion: "Plazo 30 días para impugnación" },
+    ],
     contenido_incluido: contenidoIncluido,
     timeline_hashes: timelineHashes,
+    instrucciones_verificacion_pericial: {
+      paso_1: "Verificar hash SHA-256 de cada documento contra los listados en timeline_hashes.json",
+      paso_2: "Verificar archivo .ots en https://opentimestamps.org/ para confirmar fecha cierta",
+      paso_3: "Verificar firma digital PKI con certificado del emisor",
+      paso_4: "Contrastar eventos de auditoría con registros de proveedores (SendGrid, Twilio)",
+      paso_5: "Verificar integridad del paquete ZIP con hash en header X-Hash-SHA256",
+    },
   };
 
   zip.file("00_CADENA_CUSTODIA.json", JSON.stringify(cadenaCustodia, null, 2));
 
   // README
-  const readme = `# PAQUETE DE EVIDENCIA - NOTILEGAL
+  const empleadoNombre = (notificacion.empleado as { nombre?: string })?.nombre || "N/A";
+  const readme = `# PAQUETE DE EVIDENCIA PERICIAL - NOTILEGAL v2.0
 
 ## Información del Caso
 - **Empleador**: ${empresa.razon_social} (CUIT: ${empresa.cuit})
-- **Empleado**: ${notificacion.empleado?.nombre || "N/A"}
+- **Empleado**: ${empleadoNombre}
 - **Tipo de Sanción**: ${notificacion.tipo}
 - **Estado**: ${notificacion.estado}
+- **ID Notificación**: ${notificacion.id}
 
-## Contenido
-- 00_CADENA_CUSTODIA.json - Registro de integridad
-- 01_sancion/ - Documento de la sanción
-- 02_testigos/ - Declaraciones de testigos
-- 03_evidencias/ - Archivos de evidencia
-- 04_descargo/ - Descargo del empleado
-- 05_bitacora/ - Historial de novedades
-- 06_timeline/ - Timeline de eventos
-- 07_verificacion/ - Hashes para verificación
+## Elementos Probatorios Incluidos
+- Convenio de Domicilio Electrónico: ${contenidoIncluido.convenio ? "✓" : "✗"}
+- Validación de Identidad (CUIL + OTP + Selfie): ${validacionIdentidad.cuil_validado.validado ? "✓" : "✗"}
+- Firma Digital PKI: ${notificacion.firma_digital_aplicada ? "✓" : "✗"}
+- Timestamp Blockchain (OpenTimestamps): ${contenidoIncluido.opentimestamp ? "✓" : "✗"}
+- Testigos: ${contenidoIncluido.testigos || 0}
+- Evidencias: ${contenidoIncluido.evidencias || 0}
+- Descargo del empleado: ${contenidoIncluido.descargo ? "✓" : "✗"}
+
+## Estructura del Paquete
+\`\`\`
+00_CADENA_CUSTODIA.json     - Registro completo de integridad y metadatos
+01_sancion/                 - Documento de la sanción y PDF
+02_testigos/                - Declaraciones juradas de testigos
+03_evidencias/              - Archivos multimedia de evidencia
+04_descargo/                - Descargo presentado por el empleado
+05_bitacora/                - Historial de novedades previas
+06_timeline/                - Timeline cronológico de eventos
+07_verificacion/            - Hashes SHA-256 para verificación
+08_convenio/                - Convenio de domicilio electrónico
+09_validacion_identidad/    - Datos de validación (CUIL, OTP, Selfie)
+10_blockchain/              - Archivo .ots de OpenTimestamps
+11_firma_pki/               - Firma digital y certificado
+12_auditoria/               - Log completo de eventos
+\`\`\`
+
+## Instrucciones de Verificación Pericial
+
+### 1. Verificar Integridad de Documentos
+Calcular el hash SHA-256 de cada archivo y comparar con los valores en \`07_verificacion/timeline_hashes.json\`.
+
+### 2. Verificar Fecha Cierta (Blockchain)
+El archivo \`10_blockchain/documento.ots\` puede verificarse en:
+- https://opentimestamps.org/
+- Usando el cliente oficial: \`ots verify documento.ots\`
+
+### 3. Verificar Firma Digital
+La firma en \`11_firma_pki/firma_digital.json\` puede verificarse con la clave pública del certificado emisor.
+
+### 4. Verificar Proveedores Externos
+Solicitar certificados de entrega a:
+- SendGrid: https://sendgrid.com/ (email)
+- Twilio: https://twilio.com/ (SMS/WhatsApp)
+
+### 5. Verificar Integridad del Paquete
+El hash SHA-256 del paquete ZIP está en el header HTTP \`X-Hash-SHA256\`.
+
+## Fundamentos Legales
+- Acordada N° 31/2011 CSJN - Domicilio electrónico
+- Art. 288 CCyC - Equivalencia firma digital
+- Acordada N° 3/2015 CSJN - Fecha cierta
+- Ley 25.326 - Protección de datos
+- Ley 27.742 - Plazo 30 días impugnación
 
 ---
 Generado: ${new Date().toLocaleString("es-AR")}
-Sistema: NotiLegal v1.0
+Sistema: NotiLegal v2.0
+Hash SHA-256 del paquete: [Ver header X-Hash-SHA256]
 `;
 
   zip.file("README.md", readme);
