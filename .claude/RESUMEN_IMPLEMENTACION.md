@@ -1,17 +1,18 @@
 # RESUMEN DE IMPLEMENTACIÓN - NOTILEGAL V2
 
-## Estado Actual: Fase 7 Pendiente (Contingencia Conectividad)
+## Estado Actual: Fase 10 Pendiente (Testing/Auditoría)
 
 **Última actualización:** 2026-01-18
 **Commits recientes:**
-- `[pendiente]` feat: Implementar Pack Evidencia v2.0 (Fase 6)
+- `[pendiente]` feat: Implementar Fase 7 - Contingencia Conectividad
+- `061cb83` feat: Implementar Pack Evidencia v2.0 (Fase 6)
 - `24b1c0e` feat: Implementar Fase 5 - Firma PKI y TSA RFC 3161
 - `7e6156f` feat: Implementar protocolo de lectura activa (Fase 4)
 - `6e93106` feat: Implementar webhooks con reconciliación y grace period
 
 ---
 
-## ✅ COMPLETADO (Fases 1-6)
+## ✅ COMPLETADO (Fases 1-7)
 
 | Fase | Componente | Archivos Clave |
 |------|------------|----------------|
@@ -20,6 +21,7 @@
 | 4 | Protocolo Lectura Activa | `src/components/ver/scroll-tracker.tsx`, `reconocimiento-lectura.tsx` |
 | 5 | Firma PKI + TSA | `src/lib/timestamp/`, `src/lib/pki/`, `src/app/api/cron/verificar-timestamps/` |
 | 6 | Pack Evidencia v2.0 | `src/app/api/evidencia/[id]/route.ts`, `src/components/timeline/` |
+| 7 | Contingencia Conectividad | `src/components/biometria/ContingenciaOTP.tsx`, `src/app/api/biometria/contingencia/` |
 
 ---
 
@@ -203,6 +205,45 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 
 ---
 
+## ✅ COMPLETADO: Fase 7 - Contingencia Conectividad
+
+### Implementado:
+
+1. **Detección automática de problemas**
+   - Patrones de error: cámara, conexión, timeout, SDK
+   - Contador de reintentos (máximo 2 antes de ofrecer fallback)
+   - `shouldOfferFallback()` en BiometricGate.tsx
+
+2. **BiometricGate mejorado**
+   - Nuevo estado `'fallback_offered'` con UI dedicada
+   - Props: `onRequestFallback`, `maxRetries`
+   - Botón "Usar código SMS" visible después de error
+   - Alerta informando sobre modo contingencia
+
+3. **ContingenciaOTP component**
+   - `src/components/biometria/ContingenciaOTP.tsx`
+   - Verificación por SMS cuando biometría no está disponible
+   - Registro automático de contingencia al montar
+   - Pasos: enviar OTP → verificar código → completado
+
+4. **API contingencia**
+   - `POST /api/biometria/contingencia` - Registrar activación
+   - `PATCH /api/biometria/contingencia` - Actualizar resultado
+   - Registra en `verificaciones_biometricas` con `resultado_final = 'CONTINGENCIA'`
+   - Crea evento `biometria_contingencia` en bitácora
+
+5. **Integración en client.tsx**
+   - Estado `contingenciaActiva` y `motivoContingencia`
+   - Toggle entre BiometricGate y ContingenciaOTP
+   - Handler `handleBiometriaFallback` para activar contingencia
+
+6. **Auditoría**
+   - Campos existentes: `contingencia_activada`, `contingencia_motivo`
+   - Campos de capacidad: `capacidad_camara_frontal`, `capacidad_conexion_suficiente`
+   - Evento timeline `biometria_contingencia` con icono amarillo
+
+---
+
 ## PENDIENTE (Orden de prioridad)
 
 | Fase | Componente | Prioridad | Estado |
@@ -212,10 +253,10 @@ Empleado recibe link → CUIL/OTP → Biometría (enrolamiento o verificación) 
 | 4 | Protocolo Lectura Activa | ALTA | ✅ |
 | 5 | Firma PKI (TSA) | ALTA | ✅ |
 | 6 | Pack Evidencia v2.0 | ALTA | ✅ |
-| 7 | Contingencia Conectividad | ALTA | ⏳ Siguiente |
-| 8 | RENAPER (opcional) | MEDIA | Pendiente |
-| 9 | Subsidiariedad Física | MEDIA | Pendiente |
-| 10 | Testing/Auditoría | CRÍTICA | Pendiente |
+| 7 | Contingencia Conectividad | ALTA | ✅ |
+| 8 | RENAPER (opcional) | MEDIA | Salteado |
+| 9 | Subsidiariedad Física | MEDIA | Salteado |
+| 10 | Testing/Auditoría | CRÍTICA | ⏳ Siguiente |
 | 11 | Piloto 3 clientes | CRÍTICA | Pendiente |
 
 ---

@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
-import { Loader2, CheckCircle2, XCircle, ShieldCheck, Camera } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, ShieldCheck, Camera, Phone, WifiOff } from 'lucide-react'
 import type { LivenessResult } from './FaceLivenessCheck'
 
 // Importar dinámicamente el componente de AWS Liveness para evitar SSR
@@ -36,6 +36,10 @@ interface BiometricGateProps {
   onError?: (error: string) => void
   /** Si es el primer acceso (enrolamiento) */
   isFirstAccess?: boolean
+  /** Callback para solicitar fallback a OTP (contingencia) */
+  onRequestFallback?: () => void
+  /** Máximo de reintentos antes de ofrecer contingencia */
+  maxRetries?: number
 }
 
 type GateState =
@@ -46,6 +50,31 @@ type GateState =
   | 'verifying' // Proceso de verificación en curso
   | 'success' // Verificación exitosa
   | 'error' // Error fatal
+  | 'fallback_offered' // Se ofrece contingencia por OTP
+
+// Errores que indican problemas de conectividad o dispositivo
+const FALLBACK_ERROR_PATTERNS = [
+  'cámara',
+  'camera',
+  'webcam',
+  'getUserMedia',
+  'NotAllowedError',
+  'NotFoundError',
+  'conexión',
+  'connection',
+  'network',
+  'timeout',
+  'SDK',
+  'inicializar',
+  'initialize',
+]
+
+function shouldOfferFallback(error: string): boolean {
+  const lowerError = error.toLowerCase()
+  return FALLBACK_ERROR_PATTERNS.some(pattern =>
+    lowerError.includes(pattern.toLowerCase())
+  )
+}
 
 export function BiometricGate({
   empleadoId,
@@ -54,10 +83,13 @@ export function BiometricGate({
   onVerified,
   onError,
   isFirstAccess = false,
+  onRequestFallback,
+  maxRetries = 2,
 }: BiometricGateProps) {
   const [state, setState] = useState<GateState>('checking')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [result, setResult] = useState<LivenessResult | null>(null)
+  const [retryCount, setRetryCount] = useState(0)
 
   // Verificar si el empleado tiene enrolamiento
   useEffect(() => {
@@ -101,10 +133,18 @@ export function BiometricGate({
 
   // Handler para errores
   const handleError = (error: string) => {
+    const newRetryCount = retryCount + 1
+    setRetryCount(newRetryCount)
     setErrorMessage(error)
-    setState('error')
-    if (onError) {
-      onError(error)
+
+    // Si el error es de conectividad/dispositivo O alcanzamos max reintentos, ofrecer fallback
+    if (onRequestFallback && (shouldOfferFallback(error) || newRetryCount >= maxRetries)) {
+      setState('fallback_offered')
+    } else {
+      setState('error')
+      if (onError) {
+        onError(error)
+      }
     }
   }
 
@@ -272,9 +312,56 @@ export function BiometricGate({
             <p className="text-muted-foreground text-center mb-4">
               {errorMessage || 'Ha ocurrido un error. Por favor, intente nuevamente.'}
             </p>
-            <Button onClick={retry} variant="outline">
-              Reintentar
-            </Button>
+            <div className="flex flex-col gap-2 w-full">
+              <Button onClick={retry} variant="outline">
+                Reintentar
+              </Button>
+              {onRequestFallback && retryCount >= 1 && (
+                <Button onClick={onRequestFallback} variant="secondary">
+                  <Phone className="h-4 w-4 mr-2" />
+                  Usar código SMS
+                </Button>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )
+
+    case 'fallback_offered':
+      return (
+        <Card className="max-w-md mx-auto">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="h-16 w-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+              <WifiOff className="h-8 w-8 text-amber-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-amber-700 mb-2">
+              Problema de Conectividad
+            </h3>
+            <p className="text-muted-foreground text-center mb-2">
+              {errorMessage || 'No pudimos completar la verificación facial.'}
+            </p>
+            <p className="text-sm text-muted-foreground text-center mb-6">
+              Puede continuar verificando su identidad mediante un código SMS enviado a su teléfono registrado.
+            </p>
+
+            <Alert className="mb-6">
+              <AlertTitle className="text-sm">Modo Contingencia</AlertTitle>
+              <AlertDescription className="text-xs">
+                Por razones técnicas (cámara no disponible, conexión inestable),
+                se activará el modo de contingencia con verificación por SMS.
+                Este evento quedará registrado.
+              </AlertDescription>
+            </Alert>
+
+            <div className="flex flex-col gap-2 w-full">
+              <Button onClick={onRequestFallback} className="w-full">
+                <Phone className="h-4 w-4 mr-2" />
+                Verificar por SMS
+              </Button>
+              <Button onClick={retry} variant="outline" className="w-full">
+                Reintentar Verificación Facial
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )

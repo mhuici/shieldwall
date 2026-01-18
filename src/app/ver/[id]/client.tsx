@@ -5,7 +5,7 @@ import { GatekeeperValidacion } from "@/components/ver/gatekeeper-validacion";
 import { GatekeeperValidacionReforzada } from "@/components/ver/gatekeeper-validacion-reforzada";
 import { ContenidoNotificacion } from "@/components/ver/contenido-notificacion";
 import { TrackingApertura } from "@/components/ver/tracking-apertura";
-import { BiometricGate } from "@/components/biometria/BiometricGate";
+import { BiometricGate, ContingenciaOTP } from "@/components/biometria";
 
 interface NotificacionData {
   id: string;
@@ -65,6 +65,8 @@ export function VerNotificacionClient({
   const [identidadValidada, setIdentidadValidada] = useState(initialIdentidadValidada);
   const [lecturaConfirmada, setLecturaConfirmada] = useState(initialLecturaConfirmada);
   const [biometriaCompletada, setBiometriaCompletada] = useState(initialBiometriaCompletada);
+  const [contingenciaActiva, setContingenciaActiva] = useState(false);
+  const [motivoContingencia, setMotivoContingencia] = useState("");
 
   // Si la identidad ya estaba validada (incluyendo OTP), mostrar directamente el contenido
   useEffect(() => {
@@ -79,6 +81,16 @@ export function VerNotificacionClient({
 
   const handleBiometriaVerificada = () => {
     setBiometriaCompletada(true);
+    setContingenciaActiva(false);
+  };
+
+  const handleBiometriaFallback = () => {
+    setMotivoContingencia("Problema de cámara o conexión - usuario solicitó contingencia");
+    setContingenciaActiva(true);
+  };
+
+  const handleCancelarContingencia = () => {
+    setContingenciaActiva(false);
   };
 
   const handleLecturaConfirmada = () => {
@@ -134,15 +146,27 @@ export function VerNotificacionClient({
             </div>
           </div>
 
-          {/* Biometric Gate */}
+          {/* Biometric Gate o Contingencia OTP */}
           <div className="flex-1 flex items-center justify-center p-4">
-            <BiometricGate
-              empleadoId={empleado.id}
-              empresaId={empresa.id}
-              notificacionId={notificacion.id}
-              onVerified={handleBiometriaVerificada}
-              isFirstAccess={isFirstAccess}
-            />
+            {contingenciaActiva ? (
+              <ContingenciaOTP
+                token={notificacion.token}
+                notificacionId={notificacion.id}
+                empleadoId={empleado.id}
+                motivoContingencia={motivoContingencia}
+                onVerified={handleBiometriaVerificada}
+                onCancel={handleCancelarContingencia}
+              />
+            ) : (
+              <BiometricGate
+                empleadoId={empleado.id}
+                empresaId={empresa.id}
+                notificacionId={notificacion.id}
+                onVerified={handleBiometriaVerificada}
+                onRequestFallback={handleBiometriaFallback}
+                isFirstAccess={isFirstAccess}
+              />
+            )}
           </div>
 
           {/* Footer */}
