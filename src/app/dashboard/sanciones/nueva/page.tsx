@@ -45,7 +45,7 @@ export default async function NuevaSancionPage() {
               <p className="text-muted-foreground mb-4">
                 Para emitir una sanción necesitás tener al menos un empleado cargado.
               </p>
-              <a href="/empleados" className="text-blue-600 hover:underline">
+              <a href="/dashboard/empleados" className="text-blue-600 hover:underline">
                 Ir a cargar empleados →
               </a>
             </div>

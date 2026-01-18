@@ -145,7 +145,7 @@ export default function ReenviarPage() {
     return (
       <div className="text-center py-12">
         <h2 className="text-xl font-semibold">Notificación no encontrada</h2>
-        <Link href="/sanciones">
+        <Link href="/dashboard/sanciones">
           <Button variant="link">Volver a sanciones</Button>
         </Link>
       </div>
@@ -256,7 +256,7 @@ export default function ReenviarPage() {
             <div className="p-3 bg-red-50 border border-red-200 rounded-lg">
               <p className="text-sm text-red-700">
                 El empleado no tiene email ni teléfono registrado.
-                <Link href="/empleados" className="underline ml-1">
+                <Link href="/dashboard/empleados" className="underline ml-1">
                   Actualizá sus datos primero
                 </Link>
               </p>

@@ -86,7 +86,7 @@ export default async function SancionesPage() {
             Historial de notificaciones emitidas
           </p>
         </div>
-        <Link href="/sanciones/nueva">
+        <Link href="/dashboard/sanciones/nueva">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Nueva Sanción
@@ -187,7 +187,7 @@ export default async function SancionesPage() {
               <p className="text-muted-foreground mb-4">
                 Cuando emitas una sanción, aparecerá acá
               </p>
-              <Link href="/sanciones/nueva">
+              <Link href="/dashboard/sanciones/nueva">
                 <Button>
                   <Plus className="h-4 w-4 mr-2" />
                   Crear Primera Sanción

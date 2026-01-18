@@ -116,7 +116,7 @@ export default async function DashboardPage() {
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
           <p className="text-muted-foreground">{empresa.razon_social}</p>
         </div>
-        <Link href="/sanciones/nueva">
+        <Link href="/dashboard/sanciones/nueva">
           <Button>
             <Plus className="h-4 w-4 mr-2" />
             Nueva Sanción
@@ -228,7 +228,7 @@ export default async function DashboardPage() {
                 );
               })}
               {requierenAtencion.length > 3 && (
-                <Link href="/sanciones" className="block">
+                <Link href="/dashboard/sanciones" className="block">
                   <Button variant="ghost" size="sm" className="w-full">
                     Ver todas ({requierenAtencion.length})
                   </Button>
@@ -325,7 +325,7 @@ export default async function DashboardPage() {
                     </Link>
                   );
                 })}
-                <Link href="/sanciones" className="block pt-2">
+                <Link href="/dashboard/sanciones" className="block pt-2">
                   <Button variant="ghost" size="sm" className="w-full">
                     Ver todas las sanciones
                   </Button>
@@ -335,7 +335,7 @@ export default async function DashboardPage() {
               <div className="text-center py-6 text-muted-foreground">
                 <FileText className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p className="text-sm">No hay sanciones todavía</p>
-                <Link href="/sanciones/nueva">
+                <Link href="/dashboard/sanciones/nueva">
                   <Button variant="link" size="sm">
                     Crear la primera
                   </Button>
@@ -351,19 +351,19 @@ export default async function DashboardPage() {
             <CardTitle className="text-lg">Acciones Rápidas</CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <Link href="/sanciones/nueva" className="block">
+            <Link href="/dashboard/sanciones/nueva" className="block">
               <Button variant="outline" className="w-full justify-start">
                 <Plus className="h-4 w-4 mr-2" />
                 Nueva Sanción
               </Button>
             </Link>
-            <Link href="/empleados" className="block">
+            <Link href="/dashboard/empleados" className="block">
               <Button variant="outline" className="w-full justify-start">
                 <Users className="h-4 w-4 mr-2" />
                 Gestionar Empleados
               </Button>
             </Link>
-            <Link href="/sanciones" className="block">
+            <Link href="/dashboard/sanciones" className="block">
               <Button variant="outline" className="w-full justify-start">
                 <FileText className="h-4 w-4 mr-2" />
                 Ver Todas las Sanciones
@@ -389,7 +389,7 @@ export default async function DashboardPage() {
                   Para poder emitir sanciones, primero necesitás cargar a tus
                   empleados con su CUIL, email y teléfono.
                 </p>
-                <Link href="/empleados">
+                <Link href="/dashboard/empleados">
                   <Button size="sm" className="mt-3">
                     Cargar Empleados
                   </Button>

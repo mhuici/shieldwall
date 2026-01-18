@@ -43,7 +43,7 @@ export function EnviarNotificacionButton({
               firmar primero el Convenio de Domicilio Electrónico conforme a la Acordada
               N° 31/2011 CSJN.
             </p>
-            <Link href="/empleados">
+            <Link href="/dashboard/empleados">
               <Button variant="outline" size="sm" className="gap-2">
                 <FileSignature className="h-4 w-4" />
                 Ir a gestionar convenios

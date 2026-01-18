@@ -119,7 +119,7 @@ export default async function SancionDetailPage({ params }: PageProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
-          <Link href="/sanciones">
+          <Link href="/dashboard/sanciones">
             <Button variant="ghost" size="icon">
               <ArrowLeft className="h-5 w-5" />
             </Button>
@@ -380,7 +380,7 @@ export default async function SancionDetailPage({ params }: PageProps) {
                   <AlertTriangle className="h-5 w-5 text-yellow-600" />
                   <p className="text-yellow-700">
                     El empleado no tiene email registrado.
-                    <Link href="/empleados" className="underline ml-1">
+                    <Link href="/dashboard/empleados" className="underline ml-1">
                       Agregá uno primero
                     </Link>
                   </p>

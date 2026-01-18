@@ -25,10 +25,10 @@ interface SidebarProps {
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/", icon: LayoutDashboard },
-  { name: "Empleados", href: "/empleados", icon: Users },
-  { name: "Sanciones", href: "/sanciones", icon: FileText },
-  { name: "Bitácora", href: "/bitacora", icon: BookOpen },
+  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Empleados", href: "/dashboard/empleados", icon: Users },
+  { name: "Sanciones", href: "/dashboard/sanciones", icon: FileText },
+  { name: "Bitácora", href: "/dashboard/bitacora", icon: BookOpen },
 ];
 
 export function Sidebar({ empresa, userEmail }: SidebarProps) {
@@ -46,7 +46,7 @@ export function Sidebar({ empresa, userEmail }: SidebarProps) {
     <>
       {/* Logo */}
       <div className="flex h-16 items-center px-6 border-b">
-        <Link href="/" className="flex items-center gap-2">
+        <Link href="/dashboard" className="flex items-center gap-2">
           <div className="h-8 w-8 rounded-lg bg-blue-600 flex items-center justify-center">
             <span className="text-white font-bold text-sm">NL</span>
           </div>
@@ -84,7 +84,7 @@ export function Sidebar({ empresa, userEmail }: SidebarProps) {
 
         {/* CTA Nueva Sanción */}
         <div className="pt-4">
-          <Link href="/sanciones/nueva" onClick={() => setMobileOpen(false)}>
+          <Link href="/dashboard/sanciones/nueva" onClick={() => setMobileOpen(false)}>
             <Button className="w-full" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Nueva Sanción
