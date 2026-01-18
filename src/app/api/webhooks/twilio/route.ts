@@ -14,6 +14,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { obtenerDescripcionError } from "@/lib/notifications";
+import { verifyTwilioSignature, hashPayload } from "@/lib/webhooks";
 
 // Cliente Supabase con service role
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -34,17 +35,55 @@ export async function POST(request: NextRequest) {
     // Twilio envía datos como form-urlencoded
     const formData = await request.formData();
 
-    const messageSid = formData.get("MessageSid") as string;
-    const messageStatus = formData.get("MessageStatus") as TwilioStatus;
-    const to = formData.get("To") as string;
-    const errorCode = formData.get("ErrorCode") as string | null;
-    const errorMessage = formData.get("ErrorMessage") as string | null;
+    // Convertir FormData a objeto para verificación y logging
+    const params: Record<string, string> = {};
+    formData.forEach((value, key) => {
+      params[key] = value.toString();
+    });
+
+    const messageSid = params.MessageSid;
+    const messageStatus = params.MessageStatus as TwilioStatus;
+    const to = params.To;
+    const errorCode = params.ErrorCode || null;
+    const errorMessage = params.ErrorMessage || null;
 
     if (!messageSid || !messageStatus) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
+    // Verificar firma de Twilio
+    const signature = request.headers.get("X-Twilio-Signature");
+    const webhookUrl = process.env.TWILIO_WEBHOOK_URL ||
+      `${process.env.NEXT_PUBLIC_APP_URL}/api/webhooks/twilio`;
+
+    const signatureCheck = verifyTwilioSignature(webhookUrl, params, signature);
+
     const supabase = getSupabaseAdmin();
+
+    // Log del webhook recibido
+    const payloadHash = hashPayload(params);
+    const ipOrigen = request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") || "unknown";
+
+    await supabase.from("webhook_logs").insert({
+      proveedor: "twilio",
+      evento_tipo: messageStatus,
+      payload_hash: payloadHash,
+      payload_raw: params,
+      firma_valida: signatureCheck.valid,
+      firma_error: signatureCheck.error,
+      ip_origen: ipOrigen,
+      user_agent: request.headers.get("user-agent"),
+    });
+
+    // Si la firma es inválida y está configurada la verificación, rechazar
+    if (!signatureCheck.valid && process.env.TWILIO_AUTH_TOKEN) {
+      console.warn("[Twilio Webhook] Firma inválida:", signatureCheck.error);
+      return new NextResponse("<Response></Response>", {
+        status: 401,
+        headers: { "Content-Type": "text/xml" },
+      });
+    }
 
     // Buscar la notificación por el número de teléfono
     // Primero buscar en eventos para encontrar el messageSid
@@ -86,9 +125,13 @@ export async function POST(request: NextRequest) {
     // Procesar según estado
     switch (messageStatus) {
       case "delivered":
+        // Guardar twilio_message_sid para reconciliación
         await supabase
           .from("notificaciones")
-          .update({ sms_entregado_at: timestamp })
+          .update({
+            sms_entregado_at: timestamp,
+            twilio_message_sid: messageSid,
+          })
           .eq("id", notificacionId);
 
         await supabase.from("eventos").insert({

@@ -15,6 +15,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
 import { enviarEmailAlertaEmpleador } from "@/lib/notifications";
+import { verifySendGridSignature, hashPayload } from "@/lib/webhooks";
 
 // Cliente Supabase con service role para webhooks
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!;
@@ -45,13 +46,47 @@ interface SendGridEvent {
 
 export async function POST(request: NextRequest) {
   try {
-    const events: SendGridEvent[] = await request.json();
+    // Obtener el body raw para verificación de firma
+    const rawBody = await request.text();
+    const events: SendGridEvent[] = JSON.parse(rawBody);
 
     if (!Array.isArray(events)) {
       return NextResponse.json({ error: "Invalid payload" }, { status: 400 });
     }
 
+    // Verificar firma de SendGrid
+    const signature = request.headers.get("X-Twilio-Email-Event-Webhook-Signature");
+    const timestamp = request.headers.get("X-Twilio-Email-Event-Webhook-Timestamp");
+
+    const signatureCheck = verifySendGridSignature(rawBody, signature, timestamp);
+
     const supabase = getSupabaseAdmin();
+
+    // Log del webhook recibido (incluso si la firma falla)
+    const payloadHash = hashPayload(rawBody);
+    const ipOrigen = request.headers.get("x-forwarded-for") ||
+      request.headers.get("x-real-ip") || "unknown";
+
+    // Guardar log de webhook
+    await supabase.from("webhook_logs").insert({
+      proveedor: "sendgrid",
+      evento_tipo: events.map((e) => e.event).join(","),
+      payload_hash: payloadHash,
+      payload_raw: events,
+      firma_valida: signatureCheck.valid,
+      firma_error: signatureCheck.error,
+      ip_origen: ipOrigen,
+      user_agent: request.headers.get("user-agent"),
+    });
+
+    // Si la firma es inválida y está configurada la verificación, rechazar
+    if (!signatureCheck.valid && process.env.SENDGRID_WEBHOOK_VERIFICATION_KEY) {
+      console.warn("[SendGrid Webhook] Firma inválida:", signatureCheck.error);
+      return NextResponse.json(
+        { error: "Invalid signature" },
+        { status: 401 }
+      );
+    }
 
     for (const event of events) {
       // Intentar obtener notificacion_id de custom args o del email
@@ -82,9 +117,13 @@ export async function POST(request: NextRequest) {
       // Procesar según tipo de evento
       switch (event.event) {
         case "delivered":
+          // Guardar sendgrid_message_id para reconciliación
           await supabase
             .from("notificaciones")
-            .update({ email_entregado_at: timestamp })
+            .update({
+              email_entregado_at: timestamp,
+              sendgrid_message_id: event.sg_message_id || null,
+            })
             .eq("id", notificacionId);
 
           await supabase.from("eventos").insert({
