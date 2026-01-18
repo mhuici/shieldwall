@@ -114,16 +114,32 @@ export default async function VerSancionPage({ params }: PageProps) {
   };
 
   const datosEmpresa = empresa ? {
+    id: empresa.id,
     razon_social: empresa.razon_social,
     cuit: empresa.cuit,
   } : null;
 
   const datosEmpleado = empleado ? {
+    id: empleado.id,
     nombre: empleado.nombre,
     cuil: empleado.cuil,
     telefono: empleado.telefono,
     convenioFirmado: empleado.convenio_firmado,
   } : null;
+
+  // Verificar si la biometría ya fue completada
+  const biometriaCompletada = notificacion.biometria_completada === true;
+
+  // Verificar si el empleado tiene enrolamiento (primer acceso)
+  let tieneEnrolamiento = false;
+  if (empleado?.id) {
+    const { data: enrollment } = await supabase
+      .from('enrolamiento_biometrico')
+      .select('id')
+      .eq('empleado_id', empleado.id)
+      .single();
+    tieneEnrolamiento = !!enrollment;
+  }
 
   return (
     <VerNotificacionClient
@@ -134,6 +150,8 @@ export default async function VerSancionPage({ params }: PageProps) {
       otpValidado={otpValidado}
       lecturaConfirmada={lecturaConfirmada}
       requiereSelfie={requiereSelfie}
+      biometriaCompletada={biometriaCompletada}
+      isFirstAccess={!tieneEnrolamiento}
     />
   );
 }
